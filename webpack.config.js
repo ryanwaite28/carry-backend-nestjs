@@ -25,6 +25,11 @@ module.exports = (env) => {
 
   const usePlugins = [
     new NodemonPlugin(),
+    new CopyPlugin({
+      patterns: [
+        { from: './assets', to: 'assets' },
+      ],
+    })
   ];
   
   if (env.addLocalEnv) {
@@ -33,7 +38,6 @@ module.exports = (env) => {
       new CopyPlugin({
         patterns: [
           { from: './.env', to: '' },
-          { from: './assets', to: 'assets' },
         ],
       })
     );
