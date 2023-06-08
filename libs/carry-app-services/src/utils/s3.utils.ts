@@ -51,7 +51,7 @@ export class AwsS3Service {
         }
       };
       
-      const errMsg = `AwsS3Service.uploadFile - error: no file input...`;
+      const errMsg = `AwsS3Service.uploadFile - ${options.treatNotFoundAsError ? 'error' : 'info'}: no file input...`;
       options.treatNotFoundAsError ? LOGGER.error(errMsg, { options, serviceMethodResults }) : LOGGER.info(errMsg, { options, serviceMethodResults });
       return serviceMethodResults;
     }
@@ -97,6 +97,8 @@ export class AwsS3Service {
         Body,
         ContentType: filetype
       });
+
+      LOGGER.info(`Web link to new upload: ${Link}`);
   
       const results = {
         Bucket: AppEnvironment.AWS.S3.BUCKET,
@@ -155,9 +157,8 @@ export class AwsS3Service {
       "Successfully created " +
       params.Key +
       " and uploaded it to " +
-      params.Bucket +
-      "/" +
-      params.Key
+      params.Bucket +  "/" + params.Key +
+      ", served as "
     );
     return results;
   }

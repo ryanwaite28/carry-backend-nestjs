@@ -48,7 +48,7 @@ export class DeliveryExists implements CanActivate {
 @Injectable()
 export class DeliveryExistsSlim implements CanActivate {
   constructor() {}
-
+  
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
     const response = context.switchToHttp().getResponse<Response>();
@@ -59,7 +59,8 @@ export class DeliveryExistsSlim implements CanActivate {
         message: `Delivery not found`,
       });
     }
-
+    
+    // response.locals.delivery_model = delivery_model;
     return true;
   }
 }
@@ -67,7 +68,7 @@ export class DeliveryExistsSlim implements CanActivate {
 @Injectable()
 export class DeliveryHasAssignedCarrier implements CanActivate {
   constructor() {}
-
+  
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
     const response = context.switchToHttp().getResponse<Response>();

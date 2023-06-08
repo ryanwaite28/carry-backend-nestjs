@@ -513,8 +513,8 @@ export const sequelize_model_class_crud_to_entity_class = <T> (givenModelClass: 
     throw new Error(`Model is required...`);
   }
 
-  const convertTypeCurry = (model: IMyModel) => {
-    const data = plainToInstance<T, PlainObject>(ModelEntity as ClassConstructor<T>, model.toJSON()) as T;
+  const convertTypeCurry = (model?: IMyModel) => {
+    const data = plainToInstance<T, PlainObject>(ModelEntity as ClassConstructor<T>, !model ? null : model.toJSON()) as T;
     // console.log(data);
     return data;
   };

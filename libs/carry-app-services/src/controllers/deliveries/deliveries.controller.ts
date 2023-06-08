@@ -157,42 +157,42 @@ export class DeliveriesController {
   */
   @Get('/:delivery_id/carrier-requests/all')
   @UseGuards(DeliveryExistsSlim)
-  get_carrier_delivery_requests_all(@ResponseLocals('delivery_model') delivery: DeliveryEntity) {
-    return DeliveriesService.get_carrier_delivery_requests_all(delivery.id).then(ControllerServiceResultsHandler);
+  get_carrier_delivery_requests_all(@Param('delivery_id', ParseIntPipe) delivery_id: number) {
+    return DeliveriesService.get_carrier_delivery_requests_all(delivery_id).then(ControllerServiceResultsHandler);
   }
 
   @Get('/:delivery_id/carrier-requests')
   @UseGuards(DeliveryExistsSlim)
-  get_carrier_delivery_requests(@ResponseLocals('delivery_model') delivery: DeliveryEntity) {
-    return DeliveriesService.get_carrier_delivery_requests(delivery.id).then(ControllerServiceResultsHandler);
+  get_carrier_delivery_requests(@Param('delivery_id', ParseIntPipe) delivery_id: number) {
+    return DeliveriesService.get_carrier_delivery_requests(delivery_id).then(ControllerServiceResultsHandler);
   }
 
   @Get('/:delivery_id/carrier-requests/:carrier_request_id')
   @UseGuards(DeliveryExistsSlim)
   get_carrier_delivery_requests_paginate(
-    @ResponseLocals('delivery_model') delivery: DeliveryEntity,
+    @Param('delivery_id', ParseIntPipe) delivery_id: number,
     @Param('carrier_request_id', ParseIntPipe) carrier_request_id: number
   ) {
-    return DeliveriesService.get_carrier_delivery_requests(delivery.id, carrier_request_id).then(ControllerServiceResultsHandler);
+    return DeliveriesService.get_carrier_delivery_requests(delivery_id, carrier_request_id).then(ControllerServiceResultsHandler);
   }
 
 
   @Get('/:delivery_id/carrier-requests/check-user/:user_id')
   @UseGuards(DeliveryExistsSlim)
   check_carrier_delivery_request(
-    @ResponseLocals('delivery_model') delivery: DeliveryEntity,
+    @Param('delivery_id', ParseIntPipe) delivery_id: number,
     @Param('user_id', ParseIntPipe) user_id: number
   ) {
-    return DeliveriesService.check_carrier_delivery_request(delivery.id, user_id).then(ControllerServiceResultsHandler);
+    return DeliveriesService.check_carrier_delivery_request(delivery_id, user_id).then(ControllerServiceResultsHandler);
   }
 
   @Get('/:delivery_id/carrier-requests-pending/check-user/:user_id')
   @UseGuards(DeliveryExistsSlim)
   check_carrier_delivery_request_pending(
-    @ResponseLocals('delivery_model') delivery: DeliveryEntity,
+    @Param('delivery_id', ParseIntPipe) delivery_id: number,
     @Param('user_id', ParseIntPipe) user_id: number
   ) {
-    return DeliveriesService.check_carrier_delivery_request_pending(delivery.id, user_id).then(ControllerServiceResultsHandler);
+    return DeliveriesService.check_carrier_delivery_request_pending(delivery_id, user_id).then(ControllerServiceResultsHandler);
   }
 
 

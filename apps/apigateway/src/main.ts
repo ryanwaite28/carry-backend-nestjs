@@ -52,9 +52,9 @@ async function bootstrap() {
   expressApp.use(RequestLoggerMiddleware);
   expressApp.use(express_fileupload({ safeFileNames: true, preserveExtension: true }));
   expressApp.use(express_device.capture());
-  expressApp.use(cookie_parser());
-  expressApp.use(body_parser.json());
-  expressApp.use(body_parser.urlencoded({ extended: false }));
+  // expressApp.use(cookie_parser());
+  // expressApp.use(body_parser.json());
+  // expressApp.use(body_parser.urlencoded({ extended: false }));
 
   const appServer: http.Server = http.createServer(expressApp);
   
