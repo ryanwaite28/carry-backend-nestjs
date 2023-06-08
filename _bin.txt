@@ -1,0 +1,158 @@
+express router to nestjs controller regex:
+=========
+[a-zA-Z]+Router.(get|post|put|delete)\('([a-z-_:\\\/]+)'.*([A-Z])([a-zA-Z]+)RequestHandler\.([a-z_]+)\);
+
+@\u$1('$2')
+$5() {
+  return $3$4Service.$5().then(ControllerServiceResultsHandler);
+}
+
+
+[a-zA-Z]+Router.(get|post|put|delete)\('([a-z-_:\\\/]+)', (.*),[\s]+([A-Z])([a-zA-Z]+)RequestHandler\.([a-z_]+)\);
+
+@\u$1('$2')
+@UseGuards($3)
+$6() {
+  return $4$5Service.$6().then(ControllerServiceResultsHandler);
+}
+
+
+
+
+sequelize to entity class props
+=====
+
+export const ([a-zA-Z0-9]+)(?:s)? = (.*), \{
+
+export class $1Entity {
+
+
+
+
+:([\s]+)\{(.*)(STRING|DATE|TEXT|JSON|UUID)(.*)allowNull: true(.*)\},?       ->   : string | null,
+:([\s]+)\{(.*)(STRING|DATE|TEXT|JSON|UUID)(.*)allowNull: false(.*)\},?      ->   : string,
+:([\s]+)\{(.*)(STRING|DATE|TEXT|JSON|UUID)(.*)(allowNull)?(.*)\},?          ->   : string,
+
+:([\s]+)\{(.*)(INTEGER|FLOAT|DOUBLE)(.*)allowNull: true(.*)\},?        ->   : number | null,
+:([\s]+)\{(.*)(INTEGER|FLOAT|DOUBLE)(.*)allowNull: false(.*)\},?       ->   : number,
+:([\s]+)\{(.*)(INTEGER|FLOAT|DOUBLE)(.*)(allowNull)?(.*)\},?           ->   : number,
+
+:([\s]+)\{(.*)(BOOLEAN)(.*)allowNull: true(.*)\},?                     ->   : boolean | null,
+:([\s]+)\{(.*)(BOOLEAN)(.*)allowNull: false(.*)\},?                    ->   : boolean,
+:([\s]+)\{(.*)(BOOLEAN)(.*)(allowNull)?(.*)\},?                        ->   : boolean,
+
+
+
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+} from '@nestjs/common';
+
+
+
+@JwtPayloadSlim() auth: IAuthJwtResults
+
+
+([a-zA-Z0-9]+)s?\.(hasMany|hasOne).*as: '([a-z_]+)',.*
+
+$2?: $1Entity[];
+
+
+
+([a-zA-Z0-9]+)s?\.belongsTo\((.*),.*as: '([a-z_]+)',.*
+
+$3?: $2Entity[];
+
+
+
+
+
+([a-zA-Z0-9]+)s?\.(hasMany|hasOne|belongsTo)\((.*),.*as: '([a-z_]+)',.*
+$1                                                 ->                 $4?: $3Entity[];
+
+
+
+
+@Injectable()
+export class NewGuard implements CanActivate {
+  constructor() {}
+
+  async canActivate(
+    context: ExecutionContext,
+  ): Promise<boolean> {
+    const request = context.switchToHttp().getRequest<Request>();
+    const response = context.switchToHttp().getResponse<Response>();
+    
+    
+    
+    return true;
+  }
+}
+
+
+
+
+
+(export|export async) function ([a-zA-Z]+)\(\n  request: Request,\n  response: Response,\n  next: NextFunction\n\) \{
+
+
+@Injectable()
+export class $2 implements CanActivate {
+  constructor() {}
+
+  async canActivate(
+    context: ExecutionContext,
+  ): Promise<boolean> {
+    const request = context.switchToHttp().getRequest<Request>();
+    const response = context.switchToHttp().getResponse<Response>();
+
+
+
+
+  return next\(\);
+\}
+
+
+  return true;
+}
+}
+
+
+(:  = | as | = )(<?)I([a-zA-Z]+)(>)?
+
+$1 $2$3Entity$4
+
+
+
+
+return response\.status\(HttpStatusCode\.FORBIDDEN\)\.json\(
+
+throw new ForbiddenException(
+
+
+
+return response\.status\(HttpStatusCode\.NOT_FOUND\)\.json\(
+
+throw new NotFoundException(
+
+
+return response\.status\(HttpStatusCode\.BAD_REQUEST\)\.json\(
+
+throw new BadRequestException(
+
+
+
+
+
+([a-z_]+\??: .*;)
+
+@ApiProperty()
+$1
+
+

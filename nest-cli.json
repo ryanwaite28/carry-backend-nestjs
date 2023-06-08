@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/carry-backend/src",
+  "monorepo": true,
+  "root": "apps/carry-backend",
+  "compilerOptions": {
+    "webpack": true,
+    "tsConfigPath": "apps/carry-backend/tsconfig.app.json"
+  },
+  "projects": {
+    "apigateway": {
+      "type": "application",
+      "root": "apps/apigateway",
+      "entryFile": "main",
+      "sourceRoot": "apps/apigateway/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/apigateway/tsconfig.app.json",
+        "assets": ["static"],
+        "watchAssets": true,
+        "webpack": true,
+        "webpackConfigPath": "webpack.config.js"
+      }
+    },
+
+    "web-apigateway": {
+      "type": "application",
+      "root": "apps/web-apigateway",
+      "entryFile": "main",
+      "sourceRoot": "apps/web-apigateway/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/web-apigateway/tsconfig.app.json"
+      }
+    },
+    "mobile-apigateway": {
+      "type": "application",
+      "root": "apps/mobile-apigateway",
+      "entryFile": "main",
+      "sourceRoot": "apps/mobile-apigateway/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/mobile-apigateway/tsconfig.app.json"
+      }
+    },
+    "developer-apigateway": {
+      "type": "application",
+      "root": "apps/developer-apigateway",
+      "entryFile": "main",
+      "sourceRoot": "apps/developer-apigateway/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/developer-apigateway/tsconfig.app.json"
+      }
+    },
+    
+    "carry-app-services": {
+      "type": "library",
+      "root": "libs/carry-app-services",
+      "entryFile": "index",
+      "sourceRoot": "libs/carry-app-services/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/carry-app-services/tsconfig.lib.json"
+      }
+    }
+  }
+}

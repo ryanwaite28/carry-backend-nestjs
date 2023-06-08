@@ -1,0 +1,17 @@
+<div>
+  <h1>New Delivery Dispute Opened</h1>
+
+  <p>Dispute ID: {{ dispute.id }}</p>
+  <p>Dispute Creator ID: {{ dispute.creator_id }}</p>
+  <p>Dispute User ID: {{ dispute.user_id }}</p>
+  <p>Delivery ID: {{ dispute.delivery_id }}</p>
+  <p>Created: {{ dispute.created_at }}</p>
+
+  <p>Title: {{ dispute.title }}</p>
+  <p>Details: {{ dispute.details }}</p>
+  <p>Compensation: ${{ dispute.compensation }}.00</p>
+
+  {{#if dispute.image_link}}
+  <img src="{{ dispute.image_link }}" alt="dispute-image" style="width: 300px; height: 300px">
+  {{/if}}
+</div>
