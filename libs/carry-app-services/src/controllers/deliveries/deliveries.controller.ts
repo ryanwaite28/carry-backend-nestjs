@@ -102,7 +102,7 @@ export class DeliveriesController {
   get_delivery_dispute_by_delivery_id(
     @ResponseLocals('delivery_dispute_model') dispute: DeliveryDisputeEntity
   ) {
-    return Promise.resolve(dispute);
+    return Promise.resolve(dispute).then((data) => ({ data }));
   }
 
   @Get('/:delivery_id/dispute-info')
@@ -110,7 +110,7 @@ export class DeliveriesController {
   get_delivery_dispute_info_by_delivery_id(
     @ResponseLocals('delivery_dispute_model') dispute: DeliveryDisputeEntity
   ) {
-    return Promise.resolve(dispute);
+    return Promise.resolve(dispute).then((data) => ({ data }));
   }
 
   @Get('/:delivery_id/dispute-messages')
@@ -146,7 +146,7 @@ export class DeliveriesController {
   @Get('/:delivery_id')
   @UseGuards(DeliveryExists)
   get_delivery_by_id(@ResponseLocals('delivery_model') delivery: DeliveryEntity) {
-    return Promise.resolve(delivery);
+    return Promise.resolve(delivery).then((data) => ({ data }));;
   }
 
 

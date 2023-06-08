@@ -671,5 +671,6 @@ export const ControllerServiceResultsHandler = <T> (results: ServiceMethodResult
   if (results.error) {
     throw new HttpException(results.info, results.status);
   }
+  // return { ...results.info };
   return results.info;
 }
