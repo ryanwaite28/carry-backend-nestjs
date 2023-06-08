@@ -118,10 +118,10 @@ async function bootstrap() {
 
   // listen
   // await app.listen(AppEnvironment.PORT).then(() => {
-  //   console.log(`App listening on port ${AppEnvironment.PORT}...`);
-  // });
-
+    // });
+    
   await appServer.listen(AppEnvironment.PORT);
+  console.log(`App listening on port ${AppEnvironment.PORT}...`);
 
 }
 bootstrap();
