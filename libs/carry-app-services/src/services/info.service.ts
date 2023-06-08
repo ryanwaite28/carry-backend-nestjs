@@ -1,7 +1,7 @@
 import {
   HttpStatusCode
 } from '../enums/http-status-codes.enum';
-import moment from 'moment';
+import * as moment from 'moment';
 import { ServiceMethodResults, ServiceMethodAsyncResults } from '../interfaces/common.interface';
 import { NewsDataCache } from '../models/carry.model';
 import { allowedImages } from '../utils/constants.utils';

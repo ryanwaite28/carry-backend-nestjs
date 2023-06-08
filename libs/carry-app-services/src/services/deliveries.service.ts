@@ -105,7 +105,7 @@ import {
 import { UsersService } from './users.service';
 import Stripe from 'stripe';
 import {  } from '../repos/_common.repo';
-import moment from 'moment';
+import * as moment from 'moment';
 import { PlainObject, ServiceMethodAsyncResults, ServiceMethodResults } from '../interfaces/common.interface';
 import { HttpStatusCode } from '../enums/http-status-codes.enum';
 import { validatePhone } from '../utils/validators.utils';
