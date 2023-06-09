@@ -165,6 +165,7 @@ export class AppEnvironment {
   
   public static readonly API_SECRETS = Object.freeze({
     STRIPE_SK: process.env['STRIPE_SK'],
+    MOBILE_APP_SECRET: process.env['MOBILE_APP_SECRET'],
   });
 
 }

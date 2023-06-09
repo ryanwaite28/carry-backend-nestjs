@@ -26,6 +26,7 @@ import { RequestLoggerMiddleware } from '@carry/carry-app-services/middlewares/r
 import { CsrfProtectionMiddleware } from '@carry/carry-app-services/middlewares/csrf.middleware';
 import { StripeService } from '@carry/carry-app-services/services/stripe.service';
 import { StripeWebhookEventsRequestHandler } from '@carry/carry-app-services/services/stripe-webhook-events.service';
+import { MobileRequestGuard } from '@carry/carry-app-services/middlewares/mobile-auth.middleware';
 
 
 
@@ -103,7 +104,7 @@ async function bootstrap() {
   expressApp.use(RequestLoggerMiddleware);
   expressApp.use('/api', corsWebMiddleware, CsrfProtectionMiddleware);
   expressApp.use('/web', corsWebMiddleware, CsrfProtectionMiddleware);
-  expressApp.use('/mobile', corsMobileMiddleware);
+  expressApp.use('/mobile', corsMobileMiddleware, MobileRequestGuard);
 
 
 
