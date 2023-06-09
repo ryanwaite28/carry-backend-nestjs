@@ -49,20 +49,19 @@ async function bootstrap() {
 
 
   // use express middleware
-  expressApp.use(RequestLoggerMiddleware);
   expressApp.use(express_fileupload({ safeFileNames: true, preserveExtension: true }));
   expressApp.use(express_device.capture());
-  // expressApp.use(cookie_parser());
+  expressApp.use(cookie_parser());
   // expressApp.use(body_parser.json());
   // expressApp.use(body_parser.urlencoded({ extended: false }));
-
+  
   const appServer: http.Server = http.createServer(expressApp);
   
   const io: Server = new Server(appServer, {
     cors: {
       origin: AppEnvironment.CORS.WHITELIST,
     },
-  
+    
     allowRequest: (req, callback) => {
       console.log(`socket req origin: ${req.headers.origin}`);
       const useOrigin = (req.headers.origin || '');
@@ -76,15 +75,15 @@ async function bootstrap() {
   };
   
   SocketsService.handle_io_connections(io);
-
-
+  
+  
   const endpointSecret = process.env.STRIPE_WEBHOOK_SIG ;
   expressApp.post('/stripe-webhook', raw({ type: 'application/json' }), async (request: Request, response: Response) => {  
     const sig = request.headers['stripe-signature'];
     console.log(`-------stripe webhook request:-------`, { body: request.body, headers: request.headers, sig, STRIPE_WEBHOOK_SIG: process.env.STRIPE_WEBHOOK_SIG });
-
+    
     let event;
-
+    
     try {
       event = StripeService.stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
     } 
@@ -99,8 +98,9 @@ async function bootstrap() {
     
     return StripeWebhookEventsRequestHandler.handleEvent(event, request, response);
   });
-
-
+  
+  
+  expressApp.use(RequestLoggerMiddleware);
   expressApp.use('/api', corsWebMiddleware, CsrfProtectionMiddleware);
   expressApp.use('/web', corsWebMiddleware, CsrfProtectionMiddleware);
   expressApp.use('/mobile', corsMobileMiddleware);
