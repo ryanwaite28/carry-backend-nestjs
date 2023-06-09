@@ -467,7 +467,7 @@ export function get_user_new_listings_alerts(user_id: number, listing_alert_id?:
 
 
 export function check_user_stripe_identity_verification_session(user_id: number) {
-  return user_stripe_identity_verification_session_crud.findOne({ where: { user_id, verified: false } });
+  return user_stripe_identity_verification_session_crud.findOne({ where: { user_id } });
 }
 
 export function create_user_stripe_identity_verification_session(params: {
@@ -475,6 +475,10 @@ export function create_user_stripe_identity_verification_session(params: {
   verification_session_id:     string,
 }) {
   return user_stripe_identity_verification_session_crud.create(params);
+}
+
+export function get_user_stripe_identity_verification_session_by_session_id(verification_session_id: string) {
+  return user_stripe_identity_verification_session_crud.findOne({ where: { verification_session_id } });
 }
 
 export function verify_user_stripe_identity_verification_session_by_session_id(verification_session_id: string) {

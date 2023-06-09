@@ -467,7 +467,7 @@ export class UsersController {
     @Body() dto: RedirectBodyDto,
     @Query('redirectUrl') redirectUrl: string
   ) {
-    return UsersService.create_stripe_identity_verification_session(you.id, dto?.redirectUrl || redirectUrl).then(ControllerServiceResultsHandler);
+    return UsersService.create_stripe_identity_verification_session(you, dto?.redirectUrl || redirectUrl).then(ControllerServiceResultsHandler);
   }
 
   @Put('/:user_uuid/verify-stripe-account-by-uuid')

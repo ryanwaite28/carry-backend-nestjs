@@ -132,6 +132,62 @@ export class StripeService {
     }
   }
 
+  static async account_user_is_identified(account_id: any) {
+    const stripe_account: Stripe.Account = await StripeService.stripe.accounts.retrieve(account_id, { expand: ['individual', 'individual.verification'] });
+
+    console.log({ stripe_account: JSON.stringify(stripe_account) });
+
+    if (!stripe_account.details_submitted) {
+      return {
+        stripe_account,
+        error: true,
+        status: HttpStatusCode.PRECONDITION_FAILED,
+        message: `You must complete your stripe account onboarding: all required details must be submitted`
+      };
+    }
+
+    const individualProvidedIdentity = !!stripe_account.individual && (
+      !!stripe_account.individual.first_name
+      && (!!stripe_account.individual.last_name || !!stripe_account.individual.maiden_name)
+      && !!stripe_account.individual.ssn_last_4_provided
+      && !!stripe_account.individual.dob
+      && (
+        !!stripe_account.individual.dob.day
+        && !!stripe_account.individual.dob.month
+        && !!stripe_account.individual.dob.year
+      )
+    );
+    const individualVerified = !!stripe_account.individual && (
+      stripe_account.individual.verification.status === 'verified'
+    );
+
+    const hasNeededCapabilities = (
+      individualProvidedIdentity
+      && individualVerified
+    );
+
+    console.log({
+      individualProvidedIdentity,
+      individualVerified,
+    });
+
+    if (!hasNeededCapabilities) {
+      return {
+        stripe_account,
+        error: true,
+        status: HttpStatusCode.PRECONDITION_FAILED,
+        message: `You must complete your stripe identity verification.`
+      };
+    }
+
+    return {
+      stripe_account,
+      error: false,
+      status: HttpStatusCode.OK,
+      message: `Stripe account identified and valid!`
+    };
+  }
+
   static async account_is_complete(account_id: any) {
     const stripe_account: Stripe.Account = await StripeService.stripe.accounts.retrieve(account_id, { expand: ['individual', 'individual.verification'] });
 
@@ -158,25 +214,25 @@ export class StripeService {
       (stripe_account.capabilities?.transfers && stripe_account.capabilities.transfers === 'active')
       && stripe_account.payouts_enabled
     );
-    // const individualProvidedIdentity = !!stripe_account.individual && (
-    //   !!stripe_account.individual.first_name
-    //   && (!!stripe_account.individual.last_name || !!stripe_account.individual.maiden_name)
-    //   && !!stripe_account.individual.ssn_last_4_provided
-    //   && !!stripe_account.individual.dob
-    //   && (
-    //     !!stripe_account.individual.dob.day
-    //     && !!stripe_account.individual.dob.month
-    //     && !!stripe_account.individual.dob.year
-    //   )
-    // );
-    // const individualVerified = !!stripe_account.individual && (
-    //   stripe_account.individual.verification.status === 'verified'
-    //   && stripe_account.individual.verification.document 
-    //   && (
-    //     stripe_account.individual.verification.document.front
-    //     && stripe_account.individual.verification.document.back
-    //   )
-    // );
+    const individualProvidedIdentity = !!stripe_account.individual && (
+      !!stripe_account.individual.first_name
+      && (!!stripe_account.individual.last_name || !!stripe_account.individual.maiden_name)
+      && !!stripe_account.individual.ssn_last_4_provided
+      && !!stripe_account.individual.dob
+      && (
+        !!stripe_account.individual.dob.day
+        && !!stripe_account.individual.dob.month
+        && !!stripe_account.individual.dob.year
+      )
+    );
+    const individualVerified = !!stripe_account.individual && (
+      stripe_account.individual.verification.status === 'verified'
+      && stripe_account.individual.verification.document 
+      && (
+        stripe_account.individual.verification.document.front
+        && stripe_account.individual.verification.document.back
+      )
+    );
 
     const allRequirementsMet = (
       stripe_account.details_submitted
@@ -196,9 +252,9 @@ export class StripeService {
     console.log({
       accountCanAcceptTransfers,
       allRequirementsMet,
-      hasNeededCapabilities
-      // individualProvidedIdentity,
-      // individualVerified,
+      hasNeededCapabilities,
+      individualProvidedIdentity,
+      individualVerified,
     });
 
     if (!hasNeededCapabilities) {

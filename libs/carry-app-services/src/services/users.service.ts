@@ -35,6 +35,7 @@ import { sendAwsEmail } from '../utils/ses.aws.utils';
 import { CARRY_EVENT_TYPES } from '../enums/carry.enum';
 import { LOGGER } from '../utils/logger.utils';
 import { AwsS3Service } from '../utils/s3.utils';
+import { verify_user_stripe_identity_verification_session_by_session_id } from '../repos/users.repo';
 
 
 
@@ -49,13 +50,12 @@ export class UsersService {
     try {
       let jwt = null;
       let is_subscription_active: boolean = false;
+      let is_identity_verified: boolean = false;
+      let is_account_ready: boolean = false;
 
       // console.log({ auth });
 
       if (auth.you) {
-        const you_model = await UserRepo.get_user_by_id(auth.you.id);
-        auth.you = you_model!;
-        jwt = TokensService.newUserJwtToken(auth.you);
         is_subscription_active = (await UsersService.is_subscription_active(auth.you)).info.data as boolean;
         const noCustomerAcct = !auth.you.stripe_customer_account_id || auth.you.stripe_customer_account_id === null;
         console.log({ noCustomerAcct });
@@ -84,8 +84,22 @@ export class UsersService {
           jwt = TokensService.newUserJwtToken(auth.you);
         }
 
-        // const stripe_acct_status = await StripeService.account_is_complete(auth.you.stripe_account_id);
-        // console.log({ stripe_acct_status });
+        const stripe_acct_status = await StripeService.account_is_complete(auth.you.stripe_account_id);
+
+        /*
+          Manually check the status of the user's identity verification session, in case stripe did not send the webhook event
+        */
+        is_identity_verified = await UsersService.handle_user_identity_verified_event(auth.you.id);
+        
+        is_account_ready = !stripe_acct_status.error;
+
+        console.log({ stripe_acct_status, is_identity_verified, is_account_ready });
+
+
+        // set new state
+        const you_model = await UserRepo.get_user_by_id(auth.you.id);
+        auth.you = you_model!;
+        jwt = TokensService.newUserJwtToken(auth.you);
       }
 
       const serviceMethodResults: ServiceMethodResults = {
@@ -96,6 +110,8 @@ export class UsersService {
           data: {
             ...auth,
             is_subscription_active,
+            is_identity_verified,
+            is_account_ready,
             token: jwt,
           },
         }
@@ -115,6 +131,60 @@ export class UsersService {
       };
       return serviceMethodResults;
     }
+  }
+
+  static async handle_user_identity_verified_event(user_id: number) {
+    // check if this user has a verification session
+    const user_verification_session = await UserRepo.check_user_stripe_identity_verification_session(user_id);
+    if (!user_verification_session) {
+      LOGGER.info(`No prior identity verification session by user with id:`, { user_id });
+      return false;
+    }
+    
+    // user had a session, check if verified
+    if (user_verification_session.verified) {
+      // it has already been handled; do nothing
+      LOGGER.info(`Already verified identity verification session by user with id:`, { user_verification_session });
+      return true;
+    }
+    
+    // user verification session not verified, check verification session status via Stripe
+    const verification_session: Stripe.Identity.VerificationSession = await StripeService.stripe.identity.verificationSessions.retrieve(user_verification_session.verification_session_id);
+    const is_identity_verified = verification_session.status === 'verified';
+    if (!is_identity_verified) {
+      // still not verified (must be processing/ requires input, etc on Stripe side).
+      LOGGER.info(`Not finished Stripe verified identity verification session by user with id:`, { user_id, verification_session, user_verification_session });
+      return false;
+    }
+
+    /* --- stripe identity verification session verified and not handled before --- */
+
+    // marking session as verified in database
+    await verify_user_stripe_identity_verification_session_by_session_id(verification_session.id);
+    LOGGER.info(`Marking verification session as verified for user id:`, { user_id, verification_session_id: verification_session.id });
+    
+    // mark user as identity verified in database
+    await UserRepo.update_user_by_id(user_id, { stripe_identity_verified: true });
+    LOGGER.info(`Marking user stripe identity as verified for user id:`, { user_id, verification_session_id: verification_session.id });
+    
+    // send email
+    const user: UserEntity = await UserRepo.get_user_by_id(user_id);
+    HandlebarsEmailsService.send_identity_verification_session_verified(user);
+
+    // send socket event event
+    CommonSocketEventsHandler.emitEventToUserSockets({
+      user_id,
+      event: CARRY_EVENT_TYPES.STRIPE_IDENTITY_VERIFIED,
+      event_data: {},
+    });
+
+    // send push notification
+    ExpoPushNotificationsService.sendUserPushNotification({
+      user_id,
+      message: `Stripe Identity verification process completed, you are verified!`
+    });
+
+    return true;
   }
 
   static async get_user_by_id(user_id: number): ServiceMethodAsyncResults {
@@ -1819,15 +1889,27 @@ export class UsersService {
     return serviceMethodResults;
   }
 
-  static async create_stripe_identity_verification_session(user_id: number, redirectUrl: string): ServiceMethodAsyncResults {
+  static async create_stripe_identity_verification_session(user: UserEntity, redirectUrl: string): ServiceMethodAsyncResults {
     let verification_session_id: string;
     let verification_session_client_secret: string;
     
     const useReturnUrl = `${AppEnvironment.USE_CLIENT_DOMAIN_URL}/stripe-identity-verification-return?appDeepLinkRedirectURL=${redirectUrl}`;
 
     // check if user has started a session before
-    const check_user_verification_session = await UserRepo.check_user_stripe_identity_verification_session(user_id);
+    const check_user_verification_session = await UserRepo.check_user_stripe_identity_verification_session(user.id);
     if (check_user_verification_session) {
+      if (check_user_verification_session.verified) {
+        const serviceMethodResults: ServiceMethodResults = {
+          status: HttpStatusCode.BAD_REQUEST,
+          error: false,
+          info: {
+            message: `Identity already verified`,
+            data: check_user_verification_session
+          }
+        };
+        return serviceMethodResults;
+      }
+
 
       verification_session_id = check_user_verification_session.verification_session_id;
 
@@ -1843,7 +1925,11 @@ export class UsersService {
         return_url: useReturnUrl,
         metadata: {
           timestamp: Date.now(),
-          user_id,
+          user_id: user.id,
+          user_email: user.email,
+          user_stripe_account_id: user.stripe_account_id,
+          user_firstname: user.firstname,
+          user_last: user.lastname,
         },
       });
       
@@ -1851,7 +1937,7 @@ export class UsersService {
       verification_session_client_secret = verification_session.client_secret;
       
       await UserRepo.create_user_stripe_identity_verification_session({
-        user_id,
+        user_id: user.id,
         verification_session_id: verification_session.id
       });
 
@@ -1875,8 +1961,8 @@ export class UsersService {
       // ephemeral_key,
     };
 
-    console.log({ user_id, data });
-    LOGGER.info(`Stripe identity verification session params`, { user_id, data });
+    console.log({ user, data });
+    LOGGER.info(`Stripe identity verification session params`, { user, data });
 
     const serviceMethodResults: ServiceMethodResults = {
       status: HttpStatusCode.OK,
