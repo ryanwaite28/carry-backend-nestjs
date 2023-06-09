@@ -20,7 +20,7 @@ import { AppEnvironment } from '@carry/carry-app-services/utils/app.enviornment'
 import * as path from 'path';
 import { Server } from "socket.io";
 import * as http from 'http';
-import { corsWebMiddleware, isProd } from '@carry/carry-app-services/utils/constants.utils';
+import { corsMobileMiddleware, corsWebMiddleware, isProd } from '@carry/carry-app-services/utils/constants.utils';
 import { uniqueValue } from '@carry/carry-app-services/utils/helpers.utils';
 import { RequestLoggerMiddleware } from '@carry/carry-app-services/middlewares/request-logger.middleware';
 import { CsrfProtectionMiddleware } from '@carry/carry-app-services/middlewares/csrf.middleware';
@@ -103,6 +103,7 @@ async function bootstrap() {
 
   expressApp.use('/api', corsWebMiddleware, CsrfProtectionMiddleware);
   expressApp.use('/web', corsWebMiddleware, CsrfProtectionMiddleware);
+  expressApp.use('/mobile', corsMobileMiddleware);
 
 
 
