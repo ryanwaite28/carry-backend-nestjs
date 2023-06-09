@@ -20,7 +20,9 @@
 
 // creating common ancestor class
 export abstract class BaseEntity {
-
+  created_at: string;
+  updated_at: string;
+  deleted_at: string;
 }
 
 
@@ -924,14 +926,9 @@ export class NewsDataCacheEntity extends BaseEntity {
 
 export class ApiKeyEntity extends BaseEntity {
   id: number;
-  key: string;
-  firstname: string;
-  middlename: string | null;
-  lastname: string;
-  email: string;
-  phone: string;
-  website: string;
-  verified: boolean;
+  user_id: number;
   date_created: string;
-  requests_count: number;
+  uuid: string;
+
+  user?: UserEntity;
 }

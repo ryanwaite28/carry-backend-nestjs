@@ -1,6 +1,8 @@
 import { IMyModel, MyModelStatic } from "../interfaces/carry.interface";
 import { CreateOptions, DestroyOptions, FindAttributeOptions, FindOptions, GroupOption, Includeable, Model, Order, UpdateOptions, WhereOptions } from 'sequelize';
 import {
+  SignOptions,
+  VerifyOptions,
   sign as jwt_sign,
   verify as jwt_verify
 } from 'jsonwebtoken';
@@ -161,10 +163,10 @@ export const convertModelsCurry = <T> () => (models: (IMyModel | Model)[]) => {
 }
 
 
-export function generateJWT(data: any, secret?: string) {
+export function generateJWT(data: any, secret?: string, options?: SignOptions) {
   // console.log(`generateJWT:`, { data });
   try {
-    const jwt_token = jwt_sign({ ...data }, secret || (<string> process.env.JWT_SECRET));
+    const jwt_token = jwt_sign({ ...data }, secret || (<string> process.env.JWT_SECRET), options);
     return jwt_token || null;
   } catch (e) {
     console.log(`Could not create jwt with:`, { data });
@@ -173,9 +175,9 @@ export function generateJWT(data: any, secret?: string) {
   }
 }
 
-export function decodeJWT(token: any, secret?: string) {
+export function decodeJWT(token: any, secret?: string, options?: VerifyOptions) {
   try {
-    const data = jwt_verify(token, secret || (<string> process.env.JWT_SECRET));
+    const data = jwt_verify(token, secret || (<string> process.env.JWT_SECRET), options);
     // console.log(`decodeJWT:`, { data });
     return data;
   } catch (e) {

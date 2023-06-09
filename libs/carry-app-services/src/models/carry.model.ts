@@ -787,18 +787,15 @@ export const NewsDataCache = <MyModelStatic> sequelize.define('carry_news_data_c
   uuid:                { type: Sequelize.STRING, defaultValue: Sequelize.UUIDV1 },
 }, common_options);
 
-export const ApiKeys = <MyModelStatic> sequelize.define('carry_api_keys', {
+export const ApiKeys = <MyModelStatic> sequelize.define('carry_user_api_keys', {
   id:                  { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
-  key:                 { type: Sequelize.UUID, unique: true, defaultValue: Sequelize.UUIDV1 },
   user_id:             { type: Sequelize.INTEGER, allowNull: false, references: { model: Users, key: 'id' } },
-  email:               { type: Sequelize.STRING, allowNull: false, defaultValue: '' },
-  phone:               { type: Sequelize.STRING, allowNull: false, defaultValue: '' },
-  verified:            { type: Sequelize.BOOLEAN, allowNull: false, defaultValue: false },
+  // key:                 { type: Sequelize.STRING, allowNull: false },
   date_created:        { type: Sequelize.DATE, defaultValue: Sequelize.NOW },
   uuid:                { type: Sequelize.STRING, defaultValue: Sequelize.UUIDV1 },
 }, common_options);
 
-export const ApiKeyRequest = <MyModelStatic> sequelize.define('carry_api_key_requests', {
+export const ApiKeyRequest = <MyModelStatic> sequelize.define('carry_user_api_key_requests', {
   id:                  { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
   api_key_id:          { type: Sequelize.INTEGER, allowNull: false, references: { model: ApiKeys, key: 'id' } },
   url:                 { type: Sequelize.STRING, allowNull: false, defaultValue: '' },
@@ -812,6 +809,12 @@ export const ApiKeyRequest = <MyModelStatic> sequelize.define('carry_api_key_req
 
 
 
+
+Users.hasOne(ApiKeys, { as: 'api_key', foreignKey: 'user_id', sourceKey: 'id' });
+ApiKeys.belongsTo(Users, { as: 'user', foreignKey: 'user_id', targetKey: 'id' });
+
+ApiKeys.hasMany(ApiKeyRequest, { as: 'api_key_requests', foreignKey: 'api_key_id', sourceKey: 'id' });
+ApiKeyRequest.belongsTo(ApiKeys, { as: 'api_key', foreignKey: 'api_key_id', targetKey: 'id' });
 
 Users.hasMany(UserExpoDevices, { as: 'expo_devices', foreignKey: 'user_id', sourceKey: 'id' });
 UserExpoDevices.belongsTo(Users, { as: 'user', foreignKey: 'user_id', targetKey: 'id' });

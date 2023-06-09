@@ -87,7 +87,7 @@ export class HandlebarsEmailsService {
 
   // Helpers
 
-  static async send_signup_welcome_email(user: UserEntity) {
+  static async send_signup_welcome_email(user: UserEntity, api_key_uuid: string) {
     /** Email Sign up and verify */
     const new_email_verf_model = await create_email_verification({
       user_id: user.id,
@@ -104,6 +104,7 @@ export class HandlebarsEmailsService {
         verify_link,
         user_name,
         app_name: AppEnvironment.APP_NAME.DISPLAY,
+        api_key_uuid,
       })
     })
     .then((results) => {

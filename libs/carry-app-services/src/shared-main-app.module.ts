@@ -2,14 +2,32 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { CommonController } from './controllers/common/common.controller';
 import { UsersController } from './controllers/users/users.controller';
 import { DeliveriesController } from './controllers/deliveries/deliveries.controller';
-import { carry_db_init } from './models/_def.model';
-import { startPushNewListingsAlertsNotificationsIntervalJob } from './workers/master.worker';
+import { OauthController } from './controllers/oauth/oauth.controller';
+
+@Module({
+  controllers: [
+    OauthController
+  ],
+  providers: [
+    OauthController
+  ],
+  exports: [
+    OauthController
+  ],
+})
+export class OauthCarryAppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+  }
+}
+
+
+
 
 @Module({
   controllers: [
     CommonController,
     UsersController,
-    DeliveriesController
+    DeliveriesController,
   ],
   providers: [
     CommonController,

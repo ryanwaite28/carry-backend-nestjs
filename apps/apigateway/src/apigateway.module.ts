@@ -2,7 +2,8 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import {
   ApiCarryAppModule,
   WebCarryAppModule,
-  MobileCarryAppModule
+  MobileCarryAppModule,
+  OauthCarryAppModule
 } from '@carry/carry-app-services';
 import { RouterModule } from '@nestjs/core';
 import { carry_db_init } from '@carry/carry-app-services/models/_def.model';
@@ -13,6 +14,8 @@ import { startPushNewListingsAlertsNotificationsIntervalJob } from '@carry/carry
     ApiCarryAppModule,
     WebCarryAppModule,
     MobileCarryAppModule,
+    OauthCarryAppModule,
+
     RouterModule.register([
       { path: '/api', module: ApiCarryAppModule },
       { path: '/web', module: WebCarryAppModule },
@@ -26,19 +29,12 @@ import { startPushNewListingsAlertsNotificationsIntervalJob } from '@carry/carry
         return carry_db_init().then(() => {
           console.log(`app db ready; starting app.`);
         
-          /** Start Server */
-      
-      
+          /** Start Thread Workers */
       
           startPushNewListingsAlertsNotificationsIntervalJob().subscribe({
             next: () => {}
           });
-      
-          // sendAwsInternalEmail({
-          //   // forceInLocal: true,
-          //   subject: `test subject`,
-          //   message: `test message`
-          // });
+
           return;
         }); 
       }

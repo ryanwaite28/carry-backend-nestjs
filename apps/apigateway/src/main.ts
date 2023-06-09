@@ -8,25 +8,31 @@ import { Application, Request, Response, raw } from 'express';
 import { ApigatewayModule } from './apigateway.module';
 import * as express_device from 'express-device';
 import * as express_fileupload from 'express-fileupload';
-import * as body_parser from 'body-parser';
 import * as cookie_parser from 'cookie-parser';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import {
-  ExpressAdapter,
   NestExpressApplication
 } from '@nestjs/platform-express';
 import { SocketsService } from '@carry/carry-app-services/services/sockets.service';
 import { AppEnvironment } from '@carry/carry-app-services/utils/app.enviornment';
-import * as path from 'path';
 import { Server } from "socket.io";
 import * as http from 'http';
-import { corsMobileMiddleware, corsWebMiddleware, isProd } from '@carry/carry-app-services/utils/constants.utils';
+import {
+  SetApiRequestContext,
+  SetWebRequestContext,
+  SetMobileRequestContext,
+  CorsApiMiddleware,
+  CorsMobileMiddleware,
+  CorsWebMiddleware,
+  isProd
+} from '@carry/carry-app-services/utils/constants.utils';
 import { uniqueValue } from '@carry/carry-app-services/utils/helpers.utils';
 import { RequestLoggerMiddleware } from '@carry/carry-app-services/middlewares/request-logger.middleware';
 import { CsrfProtectionMiddleware } from '@carry/carry-app-services/middlewares/csrf.middleware';
 import { StripeService } from '@carry/carry-app-services/services/stripe.service';
 import { StripeWebhookEventsRequestHandler } from '@carry/carry-app-services/services/stripe-webhook-events.service';
 import { MobileRequestGuard } from '@carry/carry-app-services/middlewares/mobile-auth.middleware';
+import { ApiRequestGuard } from '@carry/carry-app-services/middlewares/api-request.middleware';
 
 
 
@@ -46,7 +52,7 @@ async function bootstrap() {
     .addTag('carry')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('swagger-api-docs', app, document);
+  SwaggerModule.setup('swagger-ui-docs', app, document);
 
 
   // use express middleware
@@ -102,12 +108,11 @@ async function bootstrap() {
   
   
   expressApp.use(RequestLoggerMiddleware);
-  expressApp.use('/api', corsWebMiddleware, CsrfProtectionMiddleware);
-  expressApp.use('/web', corsWebMiddleware, CsrfProtectionMiddleware);
-  expressApp.use('/mobile', corsMobileMiddleware, MobileRequestGuard);
 
-
-
+  expressApp.use('/api', SetApiRequestContext, CorsApiMiddleware, ApiRequestGuard);
+  expressApp.use('/web', SetWebRequestContext, CorsWebMiddleware, CsrfProtectionMiddleware);
+  expressApp.use('/mobile', SetMobileRequestContext, CorsMobileMiddleware, MobileRequestGuard);
+  
   
 
   // health check

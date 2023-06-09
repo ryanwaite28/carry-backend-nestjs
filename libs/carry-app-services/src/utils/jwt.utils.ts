@@ -1,4 +1,4 @@
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import {
   sign as jwt_sign,
   verify as jwt_verify
@@ -6,7 +6,8 @@ import {
 import { HttpStatusCode } from '../enums/http-status-codes.enum';
 import { AUTH_BEARER_HEADER_REGEX } from '../regex/common.regex';
 import { IAuthJwtResults } from '../interfaces/common.interface';
-import { UserEntity } from '../entities/carry.entity';
+import { ApiKeyEntity, UserEntity } from '../entities/carry.entity';
+import { LOGGER } from './logger.utils';
 
 
 
@@ -40,8 +41,32 @@ export function decodeJWT(token: any, secret?: string) {
 
 export const AuthorizeJwt = (
   request: Request,
+  response: Response,
   checkUrlYouIdMatch: boolean = true,
 ): IAuthJwtResults => {
+  /*
+    Check the request context.
+    If is API request, the oauth access token (JWT) must have been valid 
+    in order to make it this far in the request chain: pull the user object from the response locals;
+    else (is web/mobile request), validate authorization header (JWT)
+  */
+
+  if (response.locals[`IS_API_REQUEST`] && response.locals['API_KEY']) {
+    LOGGER.info(`AuthorizeJwt called upon API Request; is valid auth`);
+    const api_key: ApiKeyEntity = response.locals[`API_KEY`];
+    /* Request is okay */
+    const authData = {
+      error: false,
+      status: HttpStatusCode.OK,
+      message: `user authorized`,
+      you: api_key.user!,
+    };
+
+    console.log(`Request Authorized via API request:`);
+    return authData;
+  }
+
+
   try {
     /* First, check Authorization header */
     const auth = request.get('Authorization');

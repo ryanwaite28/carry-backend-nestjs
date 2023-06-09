@@ -563,7 +563,7 @@ export const delivery_search_attrs = [
   "to_zipcode",
 ];
 
-export const corsOptions: CorsOptions = {
+export const corsApiOptions: CorsOptions = {
   // https://expressjs.com/en/resources/middleware/cors.html
   credentials: true,
   optionsSuccessStatus: 200,
@@ -571,6 +571,26 @@ export const corsOptions: CorsOptions = {
     const useOrigin = (origin || '');
     const originIsAllowed = AppEnvironment.CORS.WHITELIST.includes(useOrigin);
     
+    console.log(`API request:`, {
+      origin,
+      // callback,
+      originIsAllowed,
+      // whitelist_domains,
+    });
+    // allowing all domains/origins from server-to-server requests; requests coming in from /api should have api key header for authentiction
+    callback(null, true);
+  }
+};
+
+export const corsWebOptions: CorsOptions = {
+  // https://expressjs.com/en/resources/middleware/cors.html
+  credentials: true,
+  optionsSuccessStatus: 200,
+  origin(origin: string | undefined, callback: any) {
+    const useOrigin = (origin || '');
+    const originIsAllowed = AppEnvironment.CORS.WHITELIST.includes(useOrigin);
+    
+    // check browser origin; requests coming in from /web will authenticate through CORS, CSRF and JWT
     if (originIsAllowed) {
       callback(null, true);
     } 
@@ -595,32 +615,43 @@ export const corsMobileOptions: CorsOptions = {
     const useOrigin = (origin || '');
     const originIsAllowed = !useOrigin || AppEnvironment.CORS.WHITELIST.includes(useOrigin);
     
-    if (originIsAllowed) {
-      callback(null, true);
-    }
-    else {
-      console.log({
-        origin,
-        // callback,
-        originIsAllowed,
-        // whitelist_domains,
-      });
-      callback(new Error(`Mobile Origin "${origin}" Not allowed by CORS`));
-    }
+    console.log({
+      origin,
+      // callback,
+      originIsAllowed,
+      // whitelist_domains,
+    });
+    // allow all requests coming from /mobile route; requests should have a secret header for validating
+    callback(null, true);
   }
 };
 
-export const corsWebMiddleware = cors(corsOptions);
-export const corsMobileMiddleware = cors(corsMobileOptions);
+export const CorsApiMiddleware = cors(corsApiOptions);
+export const CorsWebMiddleware = cors(corsWebOptions);
+export const CorsMobileMiddleware = cors(corsMobileOptions);
 
 
 
-export function setWebContext(request: Request, response: Response, next: NextFunction) {
-  response.locals['IS_MOBILE'] = false;
+export enum RequestContexts {
+  API = `API`,
+  WEB = `WEB`,
+  MOBILE = `APMOBILEI`,
+}
+
+export function SetApiRequestContext(request: Request, response: Response, next: NextFunction) {
+  response.locals['REQUEST_CONTEXT'] = RequestContexts.API;
+  response.locals['IS_API_REQUEST'] = true;
   next();
 }
 
-export function setMobileContext(request: Request, response: Response, next: NextFunction) {
-  response.locals['IS_MOBILE'] = true;
+export function SetWebRequestContext(request: Request, response: Response, next: NextFunction) {
+  response.locals['REQUEST_CONTEXT'] = RequestContexts.WEB;
+  response.locals['IS_WEB_REQUEST'] = true;
+  next();
+}
+
+export function SetMobileRequestContext(request: Request, response: Response, next: NextFunction) {
+  response.locals['REQUEST_CONTEXT'] = RequestContexts.MOBILE;
+  response.locals['IS_MOBILE_REQUEST'] = true;
   next();
 }

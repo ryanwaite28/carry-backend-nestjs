@@ -16,6 +16,7 @@ import {
   sequelize_model_class_crud_to_entity_class,
 } from "../utils/helpers.utils";
 import {
+  ApiKeyEntity,
   ResetPasswordRequestEntity,
   UserEntity,
   UserExpoDeviceEntity,
@@ -304,15 +305,16 @@ export async function update_user(
   }
 }
 
-export function get_api_key(key: string) {
+export function get_api_key(uuid: string) {
   return ApiKeys.findOne({
-    where: { key },
+    where: { uuid },
     include: [{
       model: Users,
       as: 'user',
       attributes: user_attrs_slim
     }]
-  });
+  })
+  .then(model => !model ? null : model.toJSON() as ApiKeyEntity);
 }
 
 export function get_user_api_key(user_id: number) {
@@ -323,21 +325,13 @@ export function get_user_api_key(user_id: number) {
       as: 'user',
       attributes: user_attrs_slim
     }]
-  });
+  })
+  .then(model => !model ? null : model.toJSON() as ApiKeyEntity);
 }
 
-export async function create_user_api_key(params: {
-  user_id:             number,
-  firstname:           string,
-  middlename:          string,
-  lastname:            string,
-  email:               string,
-  phone:               string,
-  website:             string,
-  subscription_plan:   string,
-}) {
-  const new_key = await ApiKeys.create(params);
-  return new_key!;
+export async function create_user_api_key(user_id: number) {
+  const new_key = await ApiKeys.create({ user_id });
+  return get_api_key(new_key.dataValues.uuid);
 }
 
 

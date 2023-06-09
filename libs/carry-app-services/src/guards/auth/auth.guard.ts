@@ -25,7 +25,7 @@ export class YouAuthorized implements CanActivate {
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
     const response = context.switchToHttp().getResponse<Response>();
-    const auth = AuthorizeJwt(request, true);
+    const auth = AuthorizeJwt(request, response, true);
     
     if (auth.error) {
       throw new UnauthorizedException(auth);
@@ -47,7 +47,7 @@ export class YouAuthorizedSlim implements CanActivate {
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
     const response = context.switchToHttp().getResponse<Response>();
-    const auth = AuthorizeJwt(request, false);
+    const auth = AuthorizeJwt(request, response, false);
 
     if (auth.error) {
       throw new UnauthorizedException(auth);
@@ -68,7 +68,6 @@ export class YouStripeIdentityIsNotVerified implements CanActivate {
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
     const response = context.switchToHttp().getResponse<Response>();
-    const auth = AuthorizeJwt(request, true);
     
     const you: UserEntity = response.locals.you;
 
@@ -91,7 +90,6 @@ export class YouStripeIdentityIsVerifiedAfter3DaysSinceSignup implements CanActi
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
     const response = context.switchToHttp().getResponse<Response>();
-    const auth = AuthorizeJwt(request, true);
     
     const you: UserEntity = response.locals.you;
 

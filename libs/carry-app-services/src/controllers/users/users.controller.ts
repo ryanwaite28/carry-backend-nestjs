@@ -63,15 +63,15 @@ export class UsersController {
 
   /** Profile Context */
 
-  @Get('/phone/:phone')
-  get_user_by_phone(@Param('phone') phone: string) {
-    return UsersService.get_user_by_phone(phone).then(ControllerServiceResultsHandler);
-  }
+  // @Get('/phone/:phone')
+  // get_user_by_phone(@Param('phone') phone: string) {
+  //   return UsersService.get_user_by_phone(phone).then(ControllerServiceResultsHandler);
+  // }
 
-  @Get('/random')
-  get_random_users(@Query('limit', ParseIntPipe) limit?: number) {
-    return UsersService.get_random_users(limit).then(ControllerServiceResultsHandler);
-  }
+  // @Get('/random')
+  // get_random_users(@Query('limit', ParseIntPipe) limit?: number) {
+  //   return UsersService.get_random_users(limit).then(ControllerServiceResultsHandler);
+  // }
 
   @Get('/check-session')
   check_session(@JwtPayloadSlim() auth: IAuthJwtResults) {
@@ -110,6 +110,8 @@ export class UsersController {
   get_account_info(@JwtPayloadAuthorized() you: UserEntity) {
     return UsersService.get_account_info(you).then(ControllerServiceResultsHandler);
   }
+
+  
 
   @Get('/:you_id/stripe-login')
   @UseGuards(YouAuthorized)

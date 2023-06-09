@@ -53,7 +53,8 @@ export class UsersService {
       let is_identity_verified: boolean = false;
       let is_account_ready: boolean = false;
 
-      // console.log({ auth });
+      LOGGER.info(`Checking request auth session:`);
+      console.log({ auth });
 
       if (auth.you) {
         is_subscription_active = (await UsersService.is_subscription_active(auth.you)).info.data as boolean;
@@ -84,7 +85,7 @@ export class UsersService {
           jwt = TokensService.newUserJwtToken(auth.you);
         }
 
-        const stripe_acct_status = await StripeService.account_is_complete(auth.you.stripe_account_id);
+        const stripe_acct_status = !!auth.you.stripe_account_id && await StripeService.account_is_complete(auth.you.stripe_account_id);
 
         /*
           Manually check the status of the user's identity verification session, in case stripe did not send the webhook event
@@ -346,16 +347,7 @@ export class UsersService {
     let api_key = await UserRepo.get_user_api_key(user.id);
 
     if (!api_key) {
-      api_key = await UserRepo.create_user_api_key({
-        user_id: user.id,
-        firstname: user.firstname,
-        middlename: user.middlename,
-        lastname: user.lastname,
-        email: user.email,
-        subscription_plan: API_KEY_SUBSCRIPTION_PLAN.FREE,
-        phone: '',
-        website: '',
-      });
+      api_key = await UserRepo.create_user_api_key(user.id);
     }
 
     const serviceMethodResults: ServiceMethodResults = {
@@ -541,16 +533,7 @@ export class UsersService {
       return serviceMethodResults;
     }
 
-    const new_api_key = await UserRepo.create_user_api_key({
-      user_id:             user.id,
-      firstname:           user.firstname,
-      middlename:          user.middlename,
-      lastname:            user.lastname,
-      email:               user.email,
-      phone:               user.phone,
-      website:             '',
-      subscription_plan:   '',
-    });
+    const new_api_key = await UserRepo.create_user_api_key(user.id);
 
     const serviceMethodResults: ServiceMethodResults = {
       status: HttpStatusCode.OK,
@@ -662,12 +645,16 @@ export class UsersService {
       }
     });
 
+    // create user api key to use as a service/developer account
+    const api_key = await UserRepo.create_user_api_key(new_user.id);
+    console.log({ api_key });
+
     const updateUserResults = await UserRepo.update_user({ stripe_customer_account_id: customer.id }, { id: new_user.id });
     new_user_model = await UserRepo.get_user_by_id(new_user.id);
     new_user = new_user_model!;
   
     try {
-      HandlebarsEmailsService.send_signup_welcome_email(new_user);
+      HandlebarsEmailsService.send_signup_welcome_email(new_user, api_key.uuid);
     }
     catch (e) {
       console.log(`could not sent sign up email:`, e, { new_user });

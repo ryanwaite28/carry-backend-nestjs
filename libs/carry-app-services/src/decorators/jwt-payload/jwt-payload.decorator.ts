@@ -24,7 +24,7 @@ export const JwtPayload = createParamDecorator(
     const request = context.switchToHttp().getRequest<Request>();
     const response = context.switchToHttp().getResponse<Response>();
 
-    const auth = AuthorizeJwt(request, true);
+    const auth = AuthorizeJwt(request, response, true);
     return auth;
   },
 );
@@ -35,7 +35,7 @@ export const JwtPayloadSlim = createParamDecorator(
     const request = context.switchToHttp().getRequest<Request>();
     const response = context.switchToHttp().getResponse<Response>();
 
-    const auth = AuthorizeJwt(request, false);
+    const auth = AuthorizeJwt(request, response, false);
     return auth;
   },
 );

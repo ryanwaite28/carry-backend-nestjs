@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { HttpStatusCode } from "../enums/http-status-codes.enum";
 import { AppEnvironment } from "../utils/app.enviornment";
+import { LOGGER } from "../utils/logger.utils";
 
 /*
   The mobile app has a hard-coded secret in an environment variable set during its build.
@@ -26,5 +27,6 @@ export function MobileRequestGuard(request: Request, response: Response, next: N
     });
   }
 
+  LOGGER.info(`App secret found on request header and verified; Mobile request valid`);
   return next();
 }

@@ -77,6 +77,12 @@ export class AppEnvironment {
   */
 
   public static readonly JWT_SECRETS = {
+    OAUTH: {
+      SECRET: process.env['JWT_OAUTH_SECRET']!,
+      encode: (value: any) => generateJWT(value, process.env['JWT_OAUTH_SECRET']!),
+      decode: (value: any) => decodeJWT(value, process.env['JWT_OAUTH_SECRET']!),
+    },
+
     USER: {
       SECRET: process.env['JWT_SECRET']!,
       encode: (value: any) => generateJWT(value, process.env['JWT_SECRET']!),
@@ -84,9 +90,9 @@ export class AppEnvironment {
     },
 
     ADMIN: {
-      SECRET: process.env['JWT_DELIVERME_ADMIN_SECRET']!,
-      encode: (value: any) => generateJWT(value, process.env['JWT_DELIVERME_ADMIN_SECRET']!),
-      decode: (value: any) => decodeJWT(value, process.env['JWT_DELIVERME_ADMIN_SECRET']!),
+      SECRET: process.env['JWT_ADMIN_SECRET']!,
+      encode: (value: any) => generateJWT(value, process.env['JWT_ADMIN_SECRET']!),
+      decode: (value: any) => decodeJWT(value, process.env['JWT_ADMIN_SECRET']!),
     },
   };
 
