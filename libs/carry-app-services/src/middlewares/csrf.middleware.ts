@@ -91,6 +91,9 @@ export function CsrfProtectionMiddleware(request: Request, response: Response, n
       message: `CSRF validation failed.`
     });
   }
+  else {
+    console.log(`CSRF check valid.`);
+  }
 
   console.log(`CSRF Validation Successful; continuing request...`);
 
