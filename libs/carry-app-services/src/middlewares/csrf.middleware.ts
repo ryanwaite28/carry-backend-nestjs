@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction, CookieOptions } from "express";
 import { HttpStatusCode } from "../enums/http-status-codes.enum";
 import { v1 as uuidv1 } from "uuid";
+import { AppEnvironment } from "../utils/app.enviornment";
 
 
 
@@ -13,7 +14,7 @@ const CSRF_SAFE_METHODS = ['GET', 'OPTIONS', 'HEAD'];
 const cookieOptions: CookieOptions = {
   httpOnly: false,
   path: `/`,
-  // domain: AppEnvironment.USE_CLIENT_DOMAIN_NAME.split('://')[1],
+  domain: AppEnvironment.USE_COOKIE_DOMAIN,
   sameSite: 'none',
   secure: true,
   // expires: moment().add(1, 'hour').toDate()

@@ -29,7 +29,7 @@ export class AppEnvironment {
   public static readonly REDIS_URL: string = process.env['REDIS_URL']!;
   
   public static readonly SERVER_DOMAIN: string = process.env['SERVER_DOMAIN']!;
-  // public static readonly CLIENT_DOMAIN: string = process.env['USE_CLIENT_DOMAIN_NAME']!;
+  public static readonly USE_COOKIE_DOMAIN: string = process.env['USE_COOKIE_DOMAIN']!;
   public static readonly USE_CLIENT_DOMAIN_NAME: string = process.env[`USE_CLIENT_DOMAIN_NAME`];
   public static readonly USE_CLIENT_DOMAIN_PORT: string = process.env[`USE_CLIENT_DOMAIN_PORT`];
   public static readonly USE_CLIENT_DOMAIN_URL: string = process.env[`USE_CLIENT_DOMAIN_URL`];
