@@ -2,7 +2,7 @@ import { compile } from 'handlebars';
 import { join } from 'path';
 import { readFileSync, existsSync } from 'fs';
 import { AppEnvironment } from '../utils/app.enviornment';
-import { sendAwsEmail } from '../utils/ses.aws.utils';
+import { sendAwsEmail, sendAwsInternalEmail } from '../utils/ses.aws.utils';
 import { getUserFullName } from '../utils/helpers.utils';
 import { LOGGER } from '../utils/logger.utils';
 import { UserEntity } from '../entities/carry.entity';
@@ -87,6 +87,10 @@ export class HandlebarsEmailsService {
 
   // Helpers
 
+  static async send_internal_email() {
+
+  }
+
   static async send_signup_welcome_email(user: UserEntity, api_key_uuid: string) {
     /** Email Sign up and verify */
     const new_email_verf_model = await create_email_verification({
@@ -96,6 +100,15 @@ export class HandlebarsEmailsService {
     const new_email_verf: PlainObject = new_email_verf_model;
     const verify_link = `${AppEnvironment.USE_CLIENT_DOMAIN_URL}/verify-email/${new_email_verf.verification_code}`;
     const user_name: string = `${user.firstname} ${user.lastname}`;
+
+    sendAwsInternalEmail({
+      subject: `New User Signed Up`,
+      message: `
+        New User signed up: 
+        Name: ${user_name}
+        Email: ${user.email}
+      `
+    });
 
     return sendAwsEmail({
       to: user.email,

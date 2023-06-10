@@ -31,7 +31,7 @@ import { AppEnvironment } from '../utils/app.enviornment';
 import {
   CreateUserDto, UserSubscriptionInfoDto
 } from '../dto/user.dto';
-import { sendAwsEmail } from '../utils/ses.aws.utils';
+import { sendAwsEmail, sendAwsInternalEmail } from '../utils/ses.aws.utils';
 import { CARRY_EVENT_TYPES } from '../enums/carry.enum';
 import { LOGGER } from '../utils/logger.utils';
 import { AwsS3Service } from '../utils/s3.utils';
@@ -185,6 +185,15 @@ export class UsersService {
       message: `Stripe Identity verification process completed, you are verified!`
     });
 
+    sendAwsInternalEmail({
+      subject: `User identity verified`,
+      message: `
+        New User Subscription: 
+        Name: ${user.firstname} ${user.lastname}
+        Email: ${user.email}
+      `
+    });
+
     return true;
   }
 
@@ -258,6 +267,17 @@ export class UsersService {
       title,
       summary,
       user_id: you.id
+    });
+
+    sendAwsInternalEmail({
+      subject: `User sent site feedback`,
+      message: `
+        New User Subscription: 
+        Name: ${you.firstname} ${you.lastname}
+        Email: ${you.email},
+        Rating: ${rating}
+        Feedback: ${summary}
+      `
     });
 
     const serviceMethodResults: ServiceMethodResults = {
@@ -1928,6 +1948,16 @@ export class UsersService {
         verification_session_id: verification_session.id
       });
 
+      sendAwsInternalEmail({
+        subject: `User started identity verification session`,
+        message: `
+          New User identity verification session: 
+          Name: ${user.firstname} ${user.lastname}
+          Email: ${user.email},
+          Identity Verification Session ID: ${verification_session_id}
+        `
+      });
+
     }
 
     // const ephemeral_key: Stripe.EphemeralKey = await StripeService.stripe.ephemeralKeys.create(
@@ -2005,6 +2035,16 @@ export class UsersService {
         }
       });
       updates = await UserRepo.update_user({ stripe_account_id: account.id }, { id: you.id });
+
+      sendAwsInternalEmail({
+        subject: `User Stripe Connect Setup started`,
+        message: `
+          New User signed up: 
+          Name: ${you.firstname} ${you.lastname}
+          Email: ${you.email},
+          Stripe Connected Account ID: ${account.id}
+        `
+      });
     } else {
       account = await StripeService.stripe.accounts.retrieve(you.stripe_account_id, { expand: ['individual', 'individual.verification'] });
     }
@@ -2338,6 +2378,16 @@ export class UsersService {
     delete newUYou.password;
     const jwt = TokensService.newUserJwtToken(newUYou);
 
+    sendAwsInternalEmail({
+      subject: `User Subscribed`,
+      message: `
+        New User Subscription: 
+        Name: ${you.firstname} ${you.lastname}
+        Email: ${you.email},
+        Stripe Subscription ID: ${new_subscription.id}
+      `
+    });
+
     const serviceMethodResults: ServiceMethodResults = {
       status: HttpStatusCode.OK,
       error: false,
@@ -2368,6 +2418,16 @@ export class UsersService {
     }
     
     const subscription = await StripeService.cancel_subscription(user.platform_subscription_id);
+
+    sendAwsInternalEmail({
+      subject: `User canceled subscription`,
+      message: `
+        New User Subscription: 
+        Name: ${user.firstname} ${user.lastname}
+        Email: ${user.email},
+        Stripe Subscription ID: ${user.platform_subscription_id}
+      `
+    });
 
     const serviceMethodResults: ServiceMethodResults = {
       status: HttpStatusCode.OK,

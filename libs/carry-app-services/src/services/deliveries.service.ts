@@ -681,6 +681,9 @@ export class DeliveriesService {
     insured: boolean,
     delivery_image?: UploadedFile;
   }) {
+    let payment_intent_id: string;
+    let delivery_id: number;
+
     console.log(`create delivery options:`, options);
     try {
       const { you, data, delivery_image } = options;
@@ -733,9 +736,7 @@ export class DeliveriesService {
       // try placing hold on customer's payment method for delivery listing
       let payment_intent: Stripe.PaymentIntent;
 
-      const is_subscription_active: boolean = (
-        await UsersService.is_subscription_active(you)
-      ).info.data as boolean;
+      const is_subscription_active: boolean = (await UsersService.is_subscription_active(you)).info.data as boolean;
       const chargeFeeData = StripeService.add_on_stripe_processing_fee(
         createObj.payout + (options.insured ? DeliveryInsuranceAmounts.MAY_2023 : 0) + (createObj.urgent ? DeliveryUrgentAmounts.JUNE_2023 : 0),
         is_subscription_active,
@@ -856,6 +857,16 @@ export class DeliveriesService {
           });
         });
       }
+
+      sendAwsInternalEmail({
+        subject: `User created delivery`,
+        message: `
+          Name: ${you.firstname} ${you.lastname}
+          Email: ${you.email},
+          Payment Intent ID: ${payment_intent.id}
+          Delivery ID: ${new_delivery_model.id}
+        `
+      });
 
       // return delivery object
       const serviceMethodResults: ServiceMethodResults = {
@@ -1107,7 +1118,17 @@ export class DeliveriesService {
       }
     }
 
+    sendAwsInternalEmail({
+      subject: `User canceled delivery`,
+      message: `
+        Name: ${delivery.owner?.firstname} ${delivery.owner?.lastname}
+        Email: ${delivery.owner?.email},
+        Delivery ID: ${delivery.id}
+      `
+    });
+
     const deletes = await delete_delivery(delivery.id);
+
     const serviceMethodResults: ServiceMethodResults = {
       status: HttpStatusCode.OK,
       error: false,
@@ -2751,6 +2772,11 @@ export class DeliveriesService {
       return deliveryCompletedResults;
     }
 
+    sendAwsInternalEmail({
+      subject: `Carrier received payout`,
+      message: `Delivery owner paid carrier`
+    });
+
     const serviceMethodResults: ServiceMethodResults = {
       status: HttpStatusCode.OK,
       error: false,
@@ -3223,6 +3249,11 @@ export class DeliveriesService {
           message: notification.message,
         });
       }
+    });
+
+    sendAwsInternalEmail({
+      subject: `Carrier collected payout`,
+      message: `Delivery carrier self collected payout`
     });
 
     return results;
