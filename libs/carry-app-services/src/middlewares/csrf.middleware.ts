@@ -2,6 +2,7 @@ import { Request, Response, NextFunction, CookieOptions } from "express";
 import { HttpStatusCode } from "../enums/http-status-codes.enum";
 import { v1 as uuidv1 } from "uuid";
 import { AppEnvironment } from "../utils/app.enviornment";
+import { isProd } from "../utils/constants.utils";
 
 
 
@@ -62,7 +63,7 @@ export function CsrfAuthGuard(request: Request, response: Response, next: NextFu
 
 export function CsrfProtectionMiddleware(request: Request, response: Response, next: NextFunction) {
   const isSafeMethod = CSRF_SAFE_METHODS.includes(request.method.toUpperCase());
-  if (isSafeMethod) {
+  if (isSafeMethod || !isProd) {
     // is safe mthod; set new csrf cookie value
     const uuid = uuidv1();
     response.cookie(CSRF_COOKIE_NAME, uuid, cookieOptions);
@@ -80,16 +81,16 @@ export function CsrfProtectionMiddleware(request: Request, response: Response, n
       message: `${CSRF_COOKIE_NAME} cookie not found on request.`
     });
   }
-  // if (!csrf_token_header) {
-  //   return response.status(HttpStatusCode.BAD_REQUEST).json({
-  //     message: `${CSRF_HEADER_NAME} header not found on request.`
-  //   });
-  // }
-  // if (!valid) {
-  //   return response.status(HttpStatusCode.BAD_REQUEST).json({
-  //     message: `CSRF validation failed.`
-  //   });
-  // }
+  if (!csrf_token_header) {
+    return response.status(HttpStatusCode.BAD_REQUEST).json({
+      message: `${CSRF_HEADER_NAME} header not found on request.`
+    });
+  }
+  if (!valid) {
+    return response.status(HttpStatusCode.BAD_REQUEST).json({
+      message: `CSRF validation failed.`
+    });
+  }
 
   console.log(`CSRF Validation Successful; continuing request...`);
 
