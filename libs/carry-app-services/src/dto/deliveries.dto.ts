@@ -227,14 +227,14 @@ export class CreateDisputeSettlementOfferDto {
 export class CreateCarrierupdateLocationDto {
   @IsNumber()
   @IsNotEmpty()
-  @IsPositive()
+  // @IsPositive()
   @ApiProperty()
   carrier_latest_lat: number;
 
 
   @IsNumber()
   @IsNotEmpty()
-  @IsPositive()
+  // @IsPositive()
   @ApiProperty()
   carrier_latest_lng: number;
 
