@@ -410,10 +410,8 @@ export async function reset_delivery(delivery: DeliveryEntity) {
   await DeliveryCarrierDropoffApproachingNotifications.destroy({
     where: { delivery_id },
   });
-  // remove any pending disputes
-  DeliveryDisputes.update({ delivery_id: -1, details: `delivery reseted; original id: ${delivery_id}` }, { where: { delivery_id } })
-  .catch((error) => {
-    LOGGER.error(`Could not reset delivery disputes:`, error);
+  await DeliveryDisputes.destroy({
+    where: { delivery_id },
   });
   
   return updates;
