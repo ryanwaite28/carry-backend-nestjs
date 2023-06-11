@@ -838,7 +838,7 @@ export function create_delivery_carrier_lat_lng_location_update(params: {
   lat: number,
   lng: number,
 }) {
-  return delivery_carrier_track_location_request_crud.create(params);
+  return delivery_carrier_track_location_request_crud.create({ ...params, status: '' });
 }
 
 
