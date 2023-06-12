@@ -20,6 +20,7 @@ import { HttpContextHolder } from '../middlewares/http-context.middleware';
 import { create_api_key_webhook_event } from './users.repo';
 import { ApiKeyEntity } from '../entities/carry.entity';
 import * as Axios from 'axios';
+import { LOGGER } from '../utils/logger.utils';
 const axios = Axios.default;
 
 
@@ -99,11 +100,13 @@ export async function create_notification_and_send(
       const api_key: ApiKeyEntity | undefined = HttpContextHolder.response?.locals['API_KEY'];
       const webhook = !!api_key && api_key.webhook_endpoint;
       if (webhook) {
+        LOGGER.info(`Sending webhook event...`, params);
         axios.post(webhook, {
           api_key: api_key.uuid,
           params
         })
         .then((response) => {
+          LOGGER.info(`Webhook send successful:`, params);
           create_api_key_webhook_event({
             api_key_id: api_key.id,
             event: params.event,
@@ -112,6 +115,7 @@ export async function create_notification_and_send(
           })
         })
         .catch((error: Axios.AxiosError) => {
+          LOGGER.info(`Webhook send failed:`, params);
           create_api_key_webhook_event({
             api_key_id: api_key.id,
             event: params.event,
