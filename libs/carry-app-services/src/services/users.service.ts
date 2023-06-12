@@ -36,6 +36,8 @@ import { CARRY_EVENT_TYPES } from '../enums/carry.enum';
 import { LOGGER } from '../utils/logger.utils';
 import { AwsS3Service } from '../utils/s3.utils';
 import { verify_user_stripe_identity_verification_session_by_session_id } from '../repos/users.repo';
+import { ResponseLocals } from '../decorators/common/common.decorator';
+import { HttpContextHolder } from '../middlewares/http-context.middleware';
 
 
 
@@ -45,6 +47,19 @@ import { verify_user_stripe_identity_verification_session_by_session_id } from '
 export class UsersService {
 
   /** Request Handlers */
+
+  static async health_check() {
+    console.log(`HttpContextHolder:`, { timestamp: HttpContextHolder.timestamp });
+
+    const serviceMethodResults: ServiceMethodResults = {
+      status: HttpStatusCode.OK,
+      error: false,
+      info: {
+        message: `Users Service is Online`
+      }
+    };
+    return serviceMethodResults;
+  }
 
   static async check_session(auth: IAuthJwtResults): ServiceMethodAsyncResults {
     try {
@@ -369,6 +384,26 @@ export class UsersService {
     if (!api_key) {
       api_key = await UserRepo.create_user_api_key(user.id);
     }
+
+    const serviceMethodResults: ServiceMethodResults = {
+      status: HttpStatusCode.OK,
+      error: false,
+      info: {
+        data: api_key
+      }
+    };
+    return serviceMethodResults;
+  }
+
+  static async update_api_key_webhook_endpoint(user: UserEntity, webhook_endpoint: string): ServiceMethodAsyncResults {
+    let api_key = await UserRepo.get_user_api_key(user.id);
+    
+    if (!api_key) {
+      api_key = await UserRepo.create_user_api_key(user.id);
+    }
+    
+    await UserRepo.update_api_key_webhook_endpoint(api_key.id, webhook_endpoint);
+    api_key = await UserRepo.get_user_api_key(user.id);
 
     const serviceMethodResults: ServiceMethodResults = {
       status: HttpStatusCode.OK,
@@ -1293,6 +1328,7 @@ export class UsersService {
 
     username?: string,
     displayname?: string,
+    api_webhook?: string,
     email?: string,
     headline?: string,
     bio?: string,

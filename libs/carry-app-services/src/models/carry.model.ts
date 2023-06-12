@@ -790,16 +790,26 @@ export const NewsDataCache = <MyModelStatic> sequelize.define('carry_news_data_c
 export const ApiKeys = <MyModelStatic> sequelize.define('carry_user_api_keys', {
   id:                  { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
   user_id:             { type: Sequelize.INTEGER, allowNull: false, references: { model: Users, key: 'id' } },
-  // key:                 { type: Sequelize.STRING, allowNull: false },
+  webhook_endpoint:    { type: Sequelize.STRING, allowNull: false, defaultValue: '' },
   date_created:        { type: Sequelize.DATE, defaultValue: Sequelize.NOW },
   uuid:                { type: Sequelize.STRING, defaultValue: Sequelize.UUIDV1 },
 }, common_options);
 
-export const ApiKeyRequest = <MyModelStatic> sequelize.define('carry_user_api_key_requests', {
+export const ApiKeyRequests = <MyModelStatic> sequelize.define('carry_user_api_key_requests', {
   id:                  { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
   api_key_id:          { type: Sequelize.INTEGER, allowNull: false, references: { model: ApiKeys, key: 'id' } },
   url:                 { type: Sequelize.STRING, allowNull: false, defaultValue: '' },
   method:              { type: Sequelize.STRING, allowNull: true, defaultValue: '' },
+  metadata:            { type: Sequelize.TEXT, allowNull: true, defaultValue: '' },
+  date_created:        { type: Sequelize.DATE, defaultValue: Sequelize.NOW },
+  uuid:                { type: Sequelize.STRING, defaultValue: Sequelize.UUIDV1 },
+}, common_options);
+
+export const ApiKeyWebhookEvents = <MyModelStatic> sequelize.define('carry_user_api_key_webhook_events', {
+  id:                  { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+  api_key_id:          { type: Sequelize.INTEGER, allowNull: false, references: { model: ApiKeys, key: 'id' } },
+  event:               { type: Sequelize.STRING, allowNull: false },
+  response_code:       { type: Sequelize.INTEGER, allowNull: false },
   metadata:            { type: Sequelize.TEXT, allowNull: true, defaultValue: '' },
   date_created:        { type: Sequelize.DATE, defaultValue: Sequelize.NOW },
   uuid:                { type: Sequelize.STRING, defaultValue: Sequelize.UUIDV1 },
@@ -813,8 +823,8 @@ export const ApiKeyRequest = <MyModelStatic> sequelize.define('carry_user_api_ke
 Users.hasOne(ApiKeys, { as: 'api_key', foreignKey: 'user_id', sourceKey: 'id' });
 ApiKeys.belongsTo(Users, { as: 'user', foreignKey: 'user_id', targetKey: 'id' });
 
-ApiKeys.hasMany(ApiKeyRequest, { as: 'api_key_requests', foreignKey: 'api_key_id', sourceKey: 'id' });
-ApiKeyRequest.belongsTo(ApiKeys, { as: 'api_key', foreignKey: 'api_key_id', targetKey: 'id' });
+ApiKeys.hasMany(ApiKeyRequests, { as: 'api_key_requests', foreignKey: 'api_key_id', sourceKey: 'id' });
+ApiKeyRequests.belongsTo(ApiKeys, { as: 'api_key', foreignKey: 'api_key_id', targetKey: 'id' });
 
 Users.hasMany(UserExpoDevices, { as: 'expo_devices', foreignKey: 'user_id', sourceKey: 'id' });
 UserExpoDevices.belongsTo(Users, { as: 'user', foreignKey: 'user_id', targetKey: 'id' });

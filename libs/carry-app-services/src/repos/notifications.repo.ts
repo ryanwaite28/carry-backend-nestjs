@@ -16,6 +16,11 @@ import { populate_carry_notification_obj } from '../utils/carry.chamber';
 import { ExpoPushNotificationsService } from '../services/expo-notifications.service';
 import { Notifications } from '../models/carry.model';
 import { send_sms } from '../utils/sms-client.utils';
+import { HttpContextHolder } from '../middlewares/http-context.middleware';
+import { create_api_key_webhook_event } from './users.repo';
+import { ApiKeyEntity } from '../entities/carry.entity';
+import * as Axios from 'axios';
+const axios = Axios.default;
 
 
 export async function create_notification(
@@ -86,6 +91,35 @@ export async function create_notification_and_send(
         user_id: notification.to_id,
         message: notification.message!,
       });
+    }
+
+    const isApiRequest = HttpContextHolder.response?.locals['IS_API_REQUEST'];
+    if (isApiRequest) {
+      // send event to the api key's webhook
+      const api_key: ApiKeyEntity | undefined = HttpContextHolder.response?.locals['API_KEY'];
+      const webhook = !!api_key && api_key.webhook_endpoint;
+      if (webhook) {
+        axios.post(webhook, {
+          api_key: api_key.uuid,
+          params
+        })
+        .then((response) => {
+          create_api_key_webhook_event({
+            api_key_id: api_key.id,
+            event: params.event,
+            response_code: response.status,
+            metadata: JSON.stringify(params)
+          })
+        })
+        .catch((error: Axios.AxiosError) => {
+          create_api_key_webhook_event({
+            api_key_id: api_key.id,
+            event: params.event,
+            response_code: error.status || -1,
+            metadata: JSON.stringify(params)
+          })
+        })
+      }
     }
 
     return notification;

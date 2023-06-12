@@ -26,7 +26,6 @@ import {
   JwtPayloadSlim,
   JwtPayloadAuthorized,
   UserExistsParam,
-  ResponseLocals,
 } from '../../decorators/jwt-payload/jwt-payload.decorator';
 import { YouAuthorized, YouAuthorizedSlim } from '../../guards/auth/auth.guard';
 import { MessagesService } from '../../services/messages.service';
@@ -87,6 +86,7 @@ import {
   IsNotSettlementOfferCreator,
 } from '../../guards/delivery/delivery-dispute.guard';
 import { CreateCarrierupdateLocationDto, CreateDisputeSettlementOfferDto, FindAvailableDeliveryDto, SearchDeliveriesDto, SendDeliveryMessageDto } from '@carry/carry-app-services/dto/deliveries.dto';
+import { ResponseLocals } from '@carry/carry-app-services/decorators/common/common.decorator';
 
 
 @Controller('deliveries')

@@ -10,6 +10,8 @@ import {
   ApiKeys,
   UserNewListingsAlerts,
   UserStripeIdentityVerificationSessions,
+  ApiKeyRequests,
+  ApiKeyWebhookEvents,
 } from "../models/carry.model";
 import { user_attrs_slim } from "../utils/constants.utils";
 import {
@@ -17,6 +19,8 @@ import {
 } from "../utils/helpers.utils";
 import {
   ApiKeyEntity,
+  ApiKeyRequestEntity,
+  ApiKeyWebhookEventEntity,
   ResetPasswordRequestEntity,
   UserEntity,
   UserExpoDeviceEntity,
@@ -31,7 +35,9 @@ import {
 const users_crud = sequelize_model_class_crud_to_entity_class<UserEntity>(Users, UserEntity);
 const user_password_resets_crud = sequelize_model_class_crud_to_entity_class<ResetPasswordRequestEntity>(Users, ResetPasswordRequestEntity);
 const user_expo_devices_crud = sequelize_model_class_crud_to_entity_class<UserExpoDeviceEntity>(UserExpoDevices, UserExpoDeviceEntity);
-const api_keys_crud = sequelize_model_class_crud_to_entity_class<UserExpoDeviceEntity>(Users, UserExpoDeviceEntity);
+const api_keys_crud = sequelize_model_class_crud_to_entity_class<ApiKeyEntity>(ApiKeys, ApiKeyEntity);
+const api_key_requests_crud = sequelize_model_class_crud_to_entity_class<ApiKeyRequestEntity>(ApiKeyRequests, ApiKeyRequestEntity);
+const api_key_webHook_events_crud = sequelize_model_class_crud_to_entity_class<ApiKeyWebhookEventEntity>(ApiKeyWebhookEvents, ApiKeyWebhookEventEntity);
 
 
 
@@ -481,4 +487,29 @@ export function verify_user_stripe_identity_verification_session_by_session_id(v
 
 export function delete_user_stripe_identity_verification_session_by_session_id(verification_session_id: string) {
   return user_stripe_identity_verification_session_crud.destroy({ where: { verification_session_id } });
+}
+
+
+export function update_api_key_webhook_endpoint(api_key_id: number, webhook_endpoint) {
+  return api_keys_crud.updateById(api_key_id, { webhook_endpoint })
+}
+
+export function create_api_key_request(params: {
+  api_key_id: number;
+  url: string;
+  method: string;
+  metadata?: string;
+}) {
+  return api_key_requests_crud.create(params)
+}
+
+
+
+export function create_api_key_webhook_event(params: {
+  api_key_id: number;
+  event: string;
+  response_code: number;
+  metadata?: string;
+}) {
+  return api_key_webHook_events_crud.create(params)
 }

@@ -3,6 +3,8 @@ import { HttpStatusCode } from "../enums/http-status-codes.enum";
 import { AppEnvironment } from "../utils/app.enviornment";
 import { OauthJwtData } from "../types/oauth-jwt-data.types";
 import { LOGGER } from "../utils/logger.utils";
+import { create_api_key_request } from "../repos/users.repo";
+import { dateTimeTransform } from "../utils/carry.chamber";
 
 /*
   The mobile app has a hard-coded secret in an environment variable set during its build.
@@ -12,7 +14,7 @@ import { LOGGER } from "../utils/logger.utils";
 */
 
 
-const OAUTH_ACCESS_TOKEN_HEADER_NAME = `x-oauth-access-token`;
+export const OAUTH_ACCESS_TOKEN_HEADER_NAME = `x-oauth-access-token`;
 
 export function ApiRequestGuard(request: Request, response: Response, next: NextFunction) {
   
@@ -54,8 +56,7 @@ export function ApiRequestGuard(request: Request, response: Response, next: Next
   const jwtCreationDate = new Date(data.expiration);
   const isExpired = (new Date()) > jwtCreationDate;
   if (isExpired) {
-    return response.status(HttpStatusCode.FORBIDDEN
-      ).json({
+    return response.status(HttpStatusCode.FORBIDDEN).json({
       message: `"${OAUTH_ACCESS_TOKEN_HEADER_NAME}" value is expired`,
       expired: true
     });
@@ -66,6 +67,29 @@ export function ApiRequestGuard(request: Request, response: Response, next: Next
   // is valid API request
   LOGGER.info(`Oauth Access Token verified; API request is valid.`);
   response.locals['API_KEY'] = data.api_key;
+
+  // log api key request
+  create_api_key_request({
+    api_key_id: data.api_key.id,
+    url: request.url,
+    method: request.method,
+    metadata: JSON.stringify({
+      timestamp: Date.now(),
+      datetime: dateTimeTransform(new Date()),
+      
+      url: request.url,
+      method: request.method,
+      body: request.body,
+      headers: request.headers,
+      raw_headers: request.rawHeaders,
+      cookies: request.cookies,
+      device: JSON.stringify(request['device']),
+      params: request.params,
+      query: request.query,
+      signed_cookies: request.signedCookies,
+    })
+  });
+
   return next();
 
 }

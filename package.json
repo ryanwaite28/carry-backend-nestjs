@@ -53,7 +53,7 @@
     "amqp-connection-manager": "^4.1.9",
     "amqplib": "^0.10.3",
     "aws-sdk": "^2.1258.0",
-    "axios": "^1.2.0",
+    "axios": "^1.4.0",
     "bcrypt": "^5.1.0",
     "bcrypt-nodejs": "^0.0.3",
     "class-transformer": "^0.5.1",

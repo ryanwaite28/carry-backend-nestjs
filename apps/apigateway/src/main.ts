@@ -32,7 +32,9 @@ import { CsrfProtectionMiddleware } from '@carry/carry-app-services/middlewares/
 import { StripeService } from '@carry/carry-app-services/services/stripe.service';
 import { StripeWebhookEventsRequestHandler } from '@carry/carry-app-services/services/stripe-webhook-events.service';
 import { MobileRequestGuard } from '@carry/carry-app-services/middlewares/mobile-auth.middleware';
-import { ApiRequestGuard } from '@carry/carry-app-services/middlewares/api-request.middleware';
+import { ApiRequestGuard, OAUTH_ACCESS_TOKEN_HEADER_NAME } from '@carry/carry-app-services/middlewares/api-request.middleware';
+import { OauthJwtData } from '@carry/carry-app-services/types/oauth-jwt-data.types';
+import { HttpContextMiddleware } from '@carry/carry-app-services/middlewares/http-context.middleware';
 
 
 
@@ -69,12 +71,22 @@ async function bootstrap() {
       origin: AppEnvironment.CORS.WHITELIST,
     },
     
-    allowRequest: (req, callback) => {
-      console.log(`socket req origin: ${req.headers.origin}`);
-      const useOrigin = (req.headers.origin || '');
+    allowRequest: (request, callback) => {
+      console.log(`socket req origin: ${request.headers.origin}`);
+      const useOrigin = (request.headers.origin || '');
       const originIsAllowed = !isProd || AppEnvironment.CORS.WHITELIST.includes(useOrigin);
-      console.log({ originIsAllowed });
-      callback(null, originIsAllowed);
+      console.log({ socket_io_reques_origin: originIsAllowed });
+
+      const isApiRequest = (
+        (OAUTH_ACCESS_TOKEN_HEADER_NAME in request.headers) &&
+        !!request.headers[OAUTH_ACCESS_TOKEN_HEADER_NAME] &&
+        AppEnvironment.JWT_SECRETS.OAUTH.decode(request.headers[OAUTH_ACCESS_TOKEN_HEADER_NAME]) as OauthJwtData
+      );
+
+      const allowConnection = originIsAllowed || (!!isApiRequest && (new Date()) > (new Date(isApiRequest.expiration)));
+
+      
+      callback(null, allowConnection);
     }
   });
   io.engine.generateId = (req: any) => {
@@ -107,6 +119,7 @@ async function bootstrap() {
   });
   
   
+  expressApp.use(HttpContextMiddleware);
   expressApp.use(RequestLoggerMiddleware);
 
   expressApp.use('/api', SetApiRequestContext, CorsApiMiddleware, ApiRequestGuard);

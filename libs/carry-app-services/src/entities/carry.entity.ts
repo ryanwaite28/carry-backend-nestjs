@@ -927,8 +927,33 @@ export class NewsDataCacheEntity extends BaseEntity {
 export class ApiKeyEntity extends BaseEntity {
   id: number;
   user_id: number;
+  webhook_endpoint?: string;
   date_created: string;
   uuid: string;
 
   user?: UserEntity;
+}
+
+export class ApiKeyRequestEntity extends BaseEntity {
+  id: number;
+  api_key_id: number;
+  url: string;
+  method: string;
+  metadata: string;
+  date_created: string;
+  uuid: string;
+
+  api_key?: ApiKeyEntity;
+}
+
+export class ApiKeyWebhookEventEntity extends BaseEntity {
+  id: number;
+  api_key_id: number;
+  event: string;
+  response_code: number;
+  metadata: string;
+  date_created: string;
+  uuid: string;
+
+  api_key?: ApiKeyEntity;
 }

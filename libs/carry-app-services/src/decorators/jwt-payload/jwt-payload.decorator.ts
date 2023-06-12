@@ -8,15 +8,6 @@ import {
 
 
 
-export const ResponseLocals = createParamDecorator(
-  (propName: string, context: ExecutionContext) => {
-    const request = context.switchToHttp().getRequest<Request>();
-    const response = context.switchToHttp().getResponse<Response>();
-    return response.locals[propName];
-  },
-);
-
-
 
 
 export const JwtPayload = createParamDecorator(

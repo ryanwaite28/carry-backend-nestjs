@@ -60,6 +60,10 @@ import {
 @Controller('users')
 export class UsersController {
 
+  @Get('/healthcheck')
+  get_healthcheck() {
+    return UsersService.health_check();
+  }
 
   /** Profile Context */
 
@@ -123,6 +127,15 @@ export class UsersController {
   @UseGuards(YouAuthorized)
   get_user_api_key(@JwtPayloadAuthorized() you: UserEntity) {
     return UsersService.get_user_api_key(you).then(ControllerServiceResultsHandler);
+  }
+
+  @Put('/:you_id/api-key/webhook-endpoint')
+  @UseGuards(YouAuthorized)
+  update_api_key_webhook_endpoint(
+    @JwtPayloadAuthorized() you: UserEntity,
+    @Body('webhook_endpoint') webhook_endpoint: string
+  ) {
+    return UsersService.update_api_key_webhook_endpoint(you, webhook_endpoint).then(ControllerServiceResultsHandler);
   }
 
   @Get('/:you_id/customer-cards-payment-methods')
