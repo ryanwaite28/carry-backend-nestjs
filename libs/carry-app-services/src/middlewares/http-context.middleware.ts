@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 
 
 export class HttpContextHolder {
-  static queue: { request: Request, response: Response, timestamp: number }[] = [];
+  static queue: { request: Request, response: Response, cycleId: number }[] = [];
 
   static get request() {
     return HttpContextHolder.queue[0].request;
@@ -12,21 +12,22 @@ export class HttpContextHolder {
     return HttpContextHolder.queue[0].response;
   }
 
-  static get timestamp() {
-    return HttpContextHolder.queue[0].timestamp;
+  static get cycleId() {
+    return HttpContextHolder.queue[0].cycleId;
   }
 }
 
 
 export function HttpContextMiddleware(request: Request, response: Response, next: NextFunction) {
 
-  HttpContextHolder.queue.push({ request, response, timestamp: Date.now() });
+  HttpContextHolder.queue.push({ request, response, cycleId: Date.now() });
+  console.log(`HttpContextHolder cycle started: `, { cycleId: HttpContextHolder.cycleId, queue: HttpContextHolder.queue.length });
 
 
   const old_send = response.send;
   response.send = function () {
-    HttpContextHolder.queue.shift();
-    console.log(`HttpContextHolder cycle ended: `, { queue: HttpContextHolder.queue.length });
+    const item = HttpContextHolder.queue.shift();
+    console.log(`HttpContextHolder cycle ended: `, { cycleId: item.cycleId, queue: HttpContextHolder.queue.length });
     return old_send.apply(response, arguments);
   }
 

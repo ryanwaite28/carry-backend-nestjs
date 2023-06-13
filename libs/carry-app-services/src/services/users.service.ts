@@ -38,6 +38,7 @@ import { AwsS3Service } from '../utils/s3.utils';
 import { verify_user_stripe_identity_verification_session_by_session_id } from '../repos/users.repo';
 import { ResponseLocals } from '../decorators/common/common.decorator';
 import { HttpContextHolder } from '../middlewares/http-context.middleware';
+import { search_user_deliveries_by_title, search_user_past_delivering_by_title } from '../repos/deliveries.repo';
 
 
 
@@ -49,7 +50,7 @@ export class UsersService {
   /** Request Handlers */
 
   static async health_check() {
-    console.log(`HttpContextHolder:`, { timestamp: HttpContextHolder.timestamp });
+    console.log(`HttpContextHolder:`, { cycleId: HttpContextHolder.cycleId });
 
     const serviceMethodResults: ServiceMethodResults = {
       status: HttpStatusCode.OK,
@@ -2605,6 +2606,30 @@ export class UsersService {
 
   static async get_user_new_listings_alerts(user_id: number, alert_id?: number) {
     const resultsList = await UserRepo.get_user_new_listings_alerts(user_id, alert_id);
+    const serviceMethodResults: ServiceMethodResults = {
+      status: HttpStatusCode.OK,
+      error: false,
+      info: {
+        data: resultsList,
+      },
+    };
+    return serviceMethodResults;
+  }
+
+  static async search_user_deliveries_by_title(user: UserEntity, search_query: string) {
+    const resultsList = await search_user_deliveries_by_title(user.id, search_query?.toLowerCase() || '');
+    const serviceMethodResults: ServiceMethodResults = {
+      status: HttpStatusCode.OK,
+      error: false,
+      info: {
+        data: resultsList,
+      },
+    };
+    return serviceMethodResults;
+  }
+
+  static async search_user_past_delivering_by_title(user: UserEntity, search_query: string) {
+    const resultsList = await search_user_past_delivering_by_title(user.id, search_query?.toLowerCase() || '');
     const serviceMethodResults: ServiceMethodResults = {
       status: HttpStatusCode.OK,
       error: false,

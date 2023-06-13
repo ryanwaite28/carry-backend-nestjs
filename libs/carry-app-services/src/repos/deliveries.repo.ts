@@ -10,6 +10,7 @@ import {
   Order,
   col,
   cast,
+  where,
 } from "sequelize";
 import { STATUSES } from "../enums/common.enum";
 import { PlainObject } from "../interfaces/common.interface";
@@ -415,6 +416,32 @@ export async function reset_delivery(delivery: DeliveryEntity) {
   });
   
   return updates;
+}
+
+
+export function search_user_deliveries_by_title(owner_id: number, title: string) {
+  return delivery_crud.findAll({
+    where: {
+      owner_id,
+      title: where(fn('LOWER', col('title')), 'LIKE', '%' + title.toLowerCase() + '%')
+    },
+    include: deliveryMasterIncludes,
+    limit: 5,
+    order: [['id', 'DESC']]
+  });
+}
+
+export function search_user_past_delivering_by_title(carrier_id: number, title: string) {
+  return delivery_crud.findAll({
+    where: {
+      carrier_id,
+      completed: true,
+      title: where(fn('LOWER', col('title')), 'LIKE', '%' + title.toLowerCase() + '%')
+    },
+    include: deliveryMasterIncludes,
+    limit: 5,
+    order: [['id', 'DESC']]
+  });
 }
 
 

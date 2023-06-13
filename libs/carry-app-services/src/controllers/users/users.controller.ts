@@ -317,6 +317,25 @@ export class UsersController {
   }
 
 
+  @Get('/:you_id/search-deliveries')
+  @UseGuards(YouAuthorized)
+  search_user_deliveries_by_title(
+    @JwtPayloadAuthorized() you: UserEntity,
+    @Query('search_query') search_query: string
+  ) {
+    return UsersService.search_user_deliveries_by_title(you, search_query).then(ControllerServiceResultsHandler);
+  }
+
+  @Get('/:you_id/search-past-delivering')
+  @UseGuards(YouAuthorized)
+  search_user_past_delivering_by_title(
+    @JwtPayloadAuthorized() you: UserEntity,
+    @Query('search_query') search_query: string
+  ) {
+    return UsersService.search_user_past_delivering_by_title(you, search_query).then(ControllerServiceResultsHandler);
+  }
+
+
   // POST
   @Post('/')
   sign_up(@Body() dto: CreateUserDto) {
