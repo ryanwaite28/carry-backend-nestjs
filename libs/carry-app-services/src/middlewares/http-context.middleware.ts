@@ -28,6 +28,7 @@ export function HttpContextMiddleware(request: Request, response: Response, next
   response.send = function () {
     const item = HttpContextHolder.queue.shift();
     console.log(`HttpContextHolder cycle ended: `, { cycleId: item.cycleId, queue: HttpContextHolder.queue.length });
+    console.log(`Response args:`, arguments);
     return old_send.apply(response, arguments);
   }
 
