@@ -4,7 +4,7 @@ dotenv.config();
 
 import { NestFactory } from '@nestjs/core';
 import { IoAdapter } from '@nestjs/platform-socket.io';
-import { Application, Request, Response, raw } from 'express';
+import { Application, Request, Response, raw, json } from 'express';
 import { ApigatewayModule } from './apigateway.module';
 import * as express_device from 'express-device';
 import * as express_fileupload from 'express-fileupload';
@@ -61,7 +61,7 @@ async function bootstrap() {
   expressApp.use(express_fileupload({ safeFileNames: true, preserveExtension: true }));
   expressApp.use(express_device.capture());
   expressApp.use(cookie_parser());
-  // expressApp.use(body_parser.json());
+  expressApp.use(json());
   // expressApp.use(body_parser.urlencoded({ extended: false }));
   
   const appServer: http.Server = http.createServer(expressApp);
@@ -119,9 +119,9 @@ async function bootstrap() {
   });
   
   
-  expressApp.use(HttpContextMiddleware);
   expressApp.use(RequestLoggerMiddleware);
-
+  expressApp.use(HttpContextMiddleware);
+  
   expressApp.use('/api', SetApiRequestContext, CorsApiMiddleware, ApiRequestGuard);
   expressApp.use('/web', SetWebRequestContext, CorsWebMiddleware, CsrfProtectionMiddleware);
   expressApp.use('/mobile', SetMobileRequestContext, CorsMobileMiddleware, MobileRequestGuard);
