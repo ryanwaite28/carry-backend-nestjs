@@ -1,5 +1,6 @@
 import { HttpStatusCode } from "../enums/http-status-codes.enum";
 import { ServiceMethodResults } from "../interfaces/common.interface";
+import { NAME_REGEX } from "../regex/user.regex";
 
 export function validatePassword(password: string) {
   if (!password) { return false; }
@@ -57,10 +58,7 @@ export function validatePersonName(value: any): boolean {
 }
 
 export function validateName(name: string) {
-  if (!name) { return false; }
-  if (name.constructor !== String) { return false; }
-  const re = /^[a-zA-Z\'\-']{2,100}$/;
-  return re.test(name.toLowerCase());
+  return !!name && (typeof name === 'string') && NAME_REGEX.test(name);
 }
 
 

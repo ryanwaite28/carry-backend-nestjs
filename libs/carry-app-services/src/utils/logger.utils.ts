@@ -6,6 +6,9 @@ import {
 import { SPLAT } from 'triple-beam';
 import 'winston-daily-rotate-file';
 import  DailyRotateFile from 'winston-daily-rotate-file';
+import { AppEnvironment } from './app.enviornment';
+import * as Axios from 'axios';
+const axios = Axios.default;
 
 
 
@@ -100,3 +103,39 @@ export const RUNTIME_FILE_LOGGER = createLogger({
   ],
 });
 
+// export const SPLUNK_CLOUD_LOGGER = createLogger({
+//   format: format.combine(
+//     format.label({ label: 'SPLUNK_EVENT' }),
+//     format.json(),
+//     format.timestamp(),
+//   ),
+//   transports: [
+//     new transports.Http({
+//       host: process.env['SPLUNK_HTTP_COLLECTOR_HOST'],
+//       port: parseInt(process.env['SPLUNK_HTTP_COLLECTOR_PORT']!),
+//       headers: {
+//         Authorization: `Splunk ${process.env['SPLUNK_HTTP_COLLECTOR_TOKEN']}`
+//       }
+//     })
+//   ],
+// });
+
+export function LogSplunkCloudEvent(params: { event: string, data: any }) {
+  const options: Axios.AxiosRequestConfig = {
+    headers: { Authorization: `Splunk ${process.env['SPLUNK_HTTP_COLLECTOR_TOKEN']}` },
+    method: 'POST',
+    data: {
+      ...params.data,
+      event: params.event
+    }
+  };
+  console.log(`Splunk Event Log Sending...`);
+  return axios.post(AppEnvironment.SPLUNK_HTTP_COLLECTOR_ENDPOINT, options)
+  .then((response: Axios.AxiosResponse) => {
+    console.log(`Splunk Event Log Sent`);
+  })
+  .catch((error: Axios.AxiosError) => {
+    console.log(error);
+    console.log(`Splunk Event Log Failed`);
+  });
+}

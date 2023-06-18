@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { REQUESTS_FILE_LOGGER } from "../utils/logger.utils";
+import { LogSplunkCloudEvent, REQUESTS_FILE_LOGGER } from "../utils/logger.utils";
 import { dateTimeTransform } from "../utils/carry.chamber";
 
 
@@ -12,6 +12,7 @@ export function RequestLoggerMiddleware(request: Request, response: Response, ne
     datetime: dateTimeTransform(new Date()),
     
     url: request.url,
+    ip_address: request.ip,
     method: request.method,
     body: request.body,
     headers: request.headers,
@@ -27,9 +28,13 @@ export function RequestLoggerMiddleware(request: Request, response: Response, ne
   console.log(requestData);
   console.log(`======= NEXT =======\n\n\n`);
 
-  REQUESTS_FILE_LOGGER.info(`request data:`, {
-    request: requestData
-  });
+  // REQUESTS_FILE_LOGGER.info(`request data:`, {
+  //   request: requestData
+  // });
+
+  // SPLUNK_CLOUD_LOGGER.info('incoming request', { event: `INCOMING REQUEST`, request: requestData });
+
+  // LogSplunkCloudEvent({ event: `Incoming Request`, data: requestData });
 
   return next();
 }

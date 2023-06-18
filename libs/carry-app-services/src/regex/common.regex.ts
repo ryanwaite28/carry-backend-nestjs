@@ -9,3 +9,6 @@ export const YOUTUBE_URL_STANDARD = /http(s?):\/\/(www\.)?youtube\.com\/watch\?(
 export const YOUTUBE_URL_SHORT = /http(s?):\/\/(www\.)?youtu\.be\/(.*)/gi;
 export const YOUTUBE_URL_EMBED = /http(s?):\/\/(www\.)?youtube\.com\/embed\/(.*)/gi;
 export const YOUTUBE_URL_ID = /(v=[a-zA-Z0-9\-\_]{7,}|\/[a-zA-Z0-9\-\_]{7,})/gi;
+
+export const LEADING_SPACES = /[\s]{2,}/;
+export const LEADING_SPACES_GLOBAL = /[\s]{2,}/gi;

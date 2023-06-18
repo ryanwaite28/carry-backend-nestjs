@@ -39,6 +39,7 @@ import { verify_user_stripe_identity_verification_session_by_session_id } from '
 import { ResponseLocals } from '../decorators/common/common.decorator';
 import { HttpContextHolder } from '../middlewares/http-context.middleware';
 import { search_user_deliveries_by_title, search_user_past_delivering_by_title } from '../repos/deliveries.repo';
+import { LEADING_SPACES_GLOBAL } from '../regex/common.regex';
 
 
 
@@ -313,13 +314,13 @@ export class UsersService {
 
   static async get_account_info(user: UserEntity): ServiceMethodAsyncResults {
     try {
-      const account: Stripe.Response<Stripe.Account> = await StripeService.stripe.accounts.retrieve({ stripeAccount: user.stripe_account_id });
-      const account_balance: Stripe.Response<Stripe.Balance> = await StripeService.stripe.balance.retrieve({ stripeAccount: user.stripe_account_id });
+      const account: Stripe.Response<Stripe.Account> | null = !user.stripe_account_id ? null : await StripeService.stripe.accounts.retrieve(user.stripe_account_id);
+      const account_balance: Stripe.Response<Stripe.Balance> | null = !user.stripe_account_id ? null : await StripeService.stripe.balance.retrieve({ stripeAccount: user.stripe_account_id });
       const is_subscription_active = (await UsersService.is_subscription_active(user)).info.data as boolean;
 
-      const available = account_balance.available.reduce((acc, a) => acc + a.amount, 0);
-      const instant_available = account_balance.instant_available?.reduce((acc, a) => acc + a.amount, 0) || 0;
-      const pending = account_balance.pending?.reduce((acc, a) => acc + a.amount, 0) || 0;
+      const available = account_balance?.available.reduce((acc, a) => acc + a.amount, 0);
+      const instant_available = account_balance?.instant_available?.reduce((acc, a) => acc + a.amount, 0) || 0;
+      const pending = account_balance?.pending?.reduce((acc, a) => acc + a.amount, 0) || 0;
 
 
 
@@ -620,17 +621,24 @@ export class UsersService {
   }
 
   static async sign_up(data: CreateUserDto): ServiceMethodAsyncResults {
-    const {
-      firstname,
-      lastname,
-      username,
-      email,
-      password,
-      confirmPassword,
-    } = data;
+    console.log(`signup`, data);
+
+    const firstname = data.firstname.trim().replace(LEADING_SPACES_GLOBAL, ' ');
+    const lastname = data.lastname.trim().replace(LEADING_SPACES_GLOBAL, ' ');
+    const username = data.username?.trim().replace(LEADING_SPACES_GLOBAL, '');
+    const email = data.email;
+    const password = data.password;
+    const confirmPassword = data.confirmPassword;
+
 
     const dataValidation: ServiceMethodResults = validateData({
-      data,
+      data: {
+        firstname,
+        lastname,
+        email,
+        password,
+        confirmPassword
+      },
       validators: create_user_required_props,
     });
     if (dataValidation.error) {

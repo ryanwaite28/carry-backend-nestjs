@@ -54,6 +54,7 @@ import {
   DeliveryHasNoCarrierAssigned,
   IsDeliveryCarrier
 } from '../../guards/delivery/delivery.guard';
+import { ValidationPipe } from '@carry/carry-app-services/pipes/class-validator.pipe';
 
 
 
@@ -338,7 +339,7 @@ export class UsersController {
 
   // POST
   @Post('/')
-  sign_up(@Body() dto: CreateUserDto) {
+  sign_up(@Body(new ValidationPipe()) dto: CreateUserDto) {
     return UsersService.sign_up(dto).then(ControllerServiceResultsHandler);
   }
 
@@ -418,7 +419,7 @@ export class UsersController {
 
   // PUT
   @Put('/')
-  sign_in(@Body() dto: LoginUserDto) {
+  sign_in(@Body(new ValidationPipe()) dto: LoginUserDto) {
     return UsersService.sign_in(dto.email_or_username, dto.password).then(ControllerServiceResultsHandler);
   }
 

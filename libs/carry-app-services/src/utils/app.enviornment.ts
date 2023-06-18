@@ -174,4 +174,12 @@ export class AppEnvironment {
     MOBILE_APP_SECRET: process.env['MOBILE_APP_SECRET'],
   });
 
+  /* 
+    Splunk Http Event Collector
+  */
+  public static readonly SPLUNK_HTTP_COLLECTOR_TOKEN = process.env['SPLUNK_HTTP_COLLECTOR_TOKEN']!;
+  public static readonly SPLUNK_HTTP_COLLECTOR_PORT = parseInt(process.env['SPLUNK_HTTP_COLLECTOR_PORT']!);
+  public static readonly SPLUNK_HTTP_COLLECTOR_HOST = process.env['SPLUNK_HTTP_COLLECTOR_HOST']!;
+  public static readonly SPLUNK_HTTP_COLLECTOR_ENDPOINT = process.env['SPLUNK_HTTP_COLLECTOR_ENDPOINT']!;
+
 }
