@@ -14329,6 +14329,7 @@ let cities = [
   "Cherryvale",
   "Chetopa",
   "Coffeyville",
+  "South Coffeyville",
   "Elk City",
   "Elk Falls",
   "Grenola",

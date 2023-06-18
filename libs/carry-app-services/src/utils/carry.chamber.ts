@@ -78,7 +78,7 @@ export const create_delivery_required_props: IModelValidator[] = [
   {
     field: "from_city",
     name: "From City",
-    validator: (arg) => cities_map.has(arg),
+    validator: (arg) => !!arg && typeof arg === 'string' // cities_map.has(arg),
   },
   {
     field: "from_state",
@@ -139,7 +139,7 @@ export const create_delivery_required_props: IModelValidator[] = [
   {
     field: "to_city",
     name: "To City",
-    validator: (arg) => cities_map.has(arg),
+    validator: (arg) => !!arg && typeof arg === 'string' // cities_map.has(arg),
   },
   {
     field: "to_state",
