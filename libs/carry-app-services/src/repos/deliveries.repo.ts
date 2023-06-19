@@ -604,6 +604,7 @@ export async function search_deliveries(params: {
     results = await delivery_crud.findAll({
       where: { completed: false, carrier_id: null, owner_id: { [Op.ne]: you_id } },
       attributes: delivery_search_attrs,
+      include: deliveryMasterIncludes,
       limit: 5,
       order: [fn('RANDOM')]
     });
@@ -612,6 +613,7 @@ export async function search_deliveries(params: {
     results = await delivery_crud.findAll({
       where: { from_city, from_state, completed: false, carrier_id: null, owner_id: { [Op.ne]: you_id } },
       attributes: delivery_search_attrs,
+      include: deliveryMasterIncludes,
       limit: 5,
       order: [fn('RANDOM')]
     });
@@ -620,6 +622,7 @@ export async function search_deliveries(params: {
     results = await delivery_crud.findAll({
       where: { to_city, to_state, completed: false, carrier_id: null, owner_id: { [Op.ne]: you_id } },
       attributes: delivery_search_attrs,
+      include: deliveryMasterIncludes,
       limit: 5,
       order: [fn('RANDOM')]
     });
@@ -628,6 +631,7 @@ export async function search_deliveries(params: {
     results = await delivery_crud.findAll({
       where: { from_city, from_state, to_city, to_state, completed: false, carrier_id: null, owner_id: { [Op.ne]: you_id } },
       attributes: delivery_search_attrs,
+      include: deliveryMasterIncludes,
       limit: 5,
       order: [fn('RANDOM')]
     });

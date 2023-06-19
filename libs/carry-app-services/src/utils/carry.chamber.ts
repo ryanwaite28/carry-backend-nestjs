@@ -201,12 +201,12 @@ export const update_delivery_required_props: IModelValidator[] = [
     name: "Distance (Miles)",
     validator: numberValidator,
   },
-  {
-    field: "auto_accept_anyone",
-    name: "Auto-Accept Anyone",
-    validator: booleanValidator,
-  },
-  { field: "urgent", name: "Urgent", validator: booleanValidator },
+  // {
+  //   field: "auto_accept_anyone",
+  //   name: "Auto-Accept Anyone",
+  //   validator: booleanValidator,
+  // },
+  // { field: "urgent", name: "Urgent", validator: booleanValidator },
   {
     field: "payout",
     name: "Payout",

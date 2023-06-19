@@ -1006,6 +1006,9 @@ export class DeliveriesService {
       return dataValidation;
     }
 
+    delete updateObj.auto_accept_anyone;
+    delete updateObj.urgent;
+
     const updates = await update_delivery(delivery.id, updateObj);
 
     const serviceMethodResults: ServiceMethodResults = {

@@ -806,7 +806,7 @@ export class UsersController {
   add_delivered_picture(
     @JwtPayloadAuthorized() you: UserEntity,
     @DeliveryExistsParam() delivery: DeliveryEntity,
-    @ExpressUploadedFile('delivered_image') delivered_image: UploadedFile
+    @ExpressUploadedFile('image') delivered_image: UploadedFile
   ) {
     return DeliveriesService.add_delivered_picture({ you_id: you.id, delivery, delivered_image }).then(ControllerServiceResultsHandler);
   } 
