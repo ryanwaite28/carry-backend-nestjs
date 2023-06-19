@@ -61,7 +61,7 @@ async function bootstrap() {
   expressApp.use(express_fileupload({ safeFileNames: true, preserveExtension: true }));
   expressApp.use(express_device.capture());
   expressApp.use(cookie_parser());
-  expressApp.use(json());
+  // expressApp.use(json());
   // expressApp.use(body_parser.urlencoded({ extended: false }));
   
   const appServer: http.Server = http.createServer(expressApp);
@@ -119,12 +119,12 @@ async function bootstrap() {
   });
   
   
-  expressApp.use(RequestLoggerMiddleware);
-  expressApp.use(HttpContextMiddleware);
+  expressApp.use(json(), RequestLoggerMiddleware);
+  expressApp.use(json(), HttpContextMiddleware);
   
-  expressApp.use('/api', SetApiRequestContext, CorsApiMiddleware, ApiRequestGuard);
-  expressApp.use('/web', SetWebRequestContext, CorsWebMiddleware, CsrfProtectionMiddleware);
-  expressApp.use('/mobile', SetMobileRequestContext, CorsMobileMiddleware, MobileRequestGuard);
+  expressApp.use('/api', json(), SetApiRequestContext, CorsApiMiddleware, ApiRequestGuard);
+  expressApp.use('/web', json(), SetWebRequestContext, CorsWebMiddleware, CsrfProtectionMiddleware);
+  expressApp.use('/mobile', json(), SetMobileRequestContext, CorsMobileMiddleware, MobileRequestGuard);
   
   
 
