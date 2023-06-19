@@ -78,29 +78,29 @@ export class UsersService {
         const noCustomerAcct = !auth.you.stripe_customer_account_id || auth.you.stripe_customer_account_id === null;
         console.log({ noCustomerAcct });
 
-        if (noCustomerAcct) {
-          console.log(`Creating stripe customer account for user ${auth.you.id}...`);
+        // if (noCustomerAcct) {
+        //   console.log(`Creating stripe customer account for user ${auth.you.id}...`);
           
-          const userDisplayName = getUserFullName(auth.you);
+        //   const userDisplayName = getUserFullName(auth.you);
 
-          // create stripe customer account       stripe_customer_account_id
-          const customer = await StripeService.stripe.customers.create({
-            name: userDisplayName,
-            description: `Modern Apps Customer: ${userDisplayName}`,
-            email: auth.you.email,
-            metadata: {
-              user_id: auth.you.id,
-            }
-          });
+        //   // create stripe customer account       stripe_customer_account_id
+        //   const customer = await StripeService.stripe.customers.create({
+        //     name: userDisplayName,
+        //     description: `Modern Apps Customer: ${userDisplayName}`,
+        //     email: auth.you.email,
+        //     metadata: {
+        //       user_id: auth.you.id,
+        //     }
+        //   });
 
-          const updateUserResults = await UserRepo.update_user({ stripe_customer_account_id: customer.id }, { id: auth.you.id });
-          let new_user_model = await UserRepo.get_user_by_id(auth.you.id);
-          let new_user = new_user_model!;
-          auth.you = new_user;
+        //   const updateUserResults = await UserRepo.update_user({ stripe_customer_account_id: customer.id }, { id: auth.you.id });
+        //   let new_user_model = await UserRepo.get_user_by_id(auth.you.id);
+        //   let new_user = new_user_model!;
+        //   auth.you = new_user;
 
-          // create JWT
-          jwt = TokensService.newUserJwtToken(auth.you);
-        }
+        //   // create JWT
+        //   jwt = TokensService.newUserJwtToken(auth.you);
+        // }
 
         const stripe_acct_status = !!auth.you.stripe_account_id && await StripeService.account_is_complete(auth.you.stripe_account_id);
 
@@ -706,6 +706,7 @@ export class UsersService {
       email: new_user.email,
       metadata: {
         user_id: new_user.id,
+        ...createInfo
       }
     });
 
@@ -713,7 +714,7 @@ export class UsersService {
     const api_key = await UserRepo.create_user_api_key(new_user.id);
     console.log({ api_key });
 
-    const updateUserResults = await UserRepo.update_user({ stripe_customer_account_id: customer.id }, { id: new_user.id });
+    const updateUserResults = await UserRepo.update_user_by_id(new_user.id, { stripe_customer_account_id: customer.id });
     new_user_model = await UserRepo.get_user_by_id(new_user.id);
     new_user = new_user_model!;
   
