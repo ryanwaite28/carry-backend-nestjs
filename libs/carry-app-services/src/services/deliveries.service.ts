@@ -2943,14 +2943,15 @@ export class DeliveriesService {
     const carrier_id = delivery.carrier_id;
 
     const MIN_WAIT_BEFORE_REMOVING_CARRIER: number = 20;
+    const minutesPastCount = minutesPast(delivery.carrier_assigned_date!);
 
-    const carrierNotPickedUpIn20MinutesSinceListingCreated = !!delivery.carrier_id && !delivery.datetime_picked_up && (minutesPast(delivery.carrier_assigned_date!) >= MIN_WAIT_BEFORE_REMOVING_CARRIER);
-    if (carrierNotPickedUpIn20MinutesSinceListingCreated) {
+    const carrierNotPickedUpIn20MinutesSinceAssigned: boolean = !!delivery.carrier_id && !delivery.datetime_picked_up && (minutesPastCount < MIN_WAIT_BEFORE_REMOVING_CARRIER);
+    if (carrierNotPickedUpIn20MinutesSinceAssigned) {
       const serviceMethodResults: ServiceMethodResults = {
         status: HttpStatusCode.BAD_REQUEST,
         error: true,
         info: {
-          message: `Has not been ${MIN_WAIT_BEFORE_REMOVING_CARRIER} since carrier was assigned`
+          message: `Has not been ${MIN_WAIT_BEFORE_REMOVING_CARRIER} minutes since carrier was assigned; only ${minutesPastCount.toFixed(0)} minutes past`
         },
       };
       return serviceMethodResults;

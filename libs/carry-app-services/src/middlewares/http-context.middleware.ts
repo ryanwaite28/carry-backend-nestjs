@@ -5,15 +5,15 @@ export class HttpContextHolder {
   static queue: { request: Request, response: Response, cycleId: number }[] = [];
 
   static get request() {
-    return HttpContextHolder.queue[0].request;
+    return HttpContextHolder.queue[0]?.request;
   }
 
   static get response() {
-    return HttpContextHolder.queue[0].response;
+    return HttpContextHolder.queue[0]?.response;
   }
 
   static get cycleId() {
-    return HttpContextHolder.queue[0].cycleId;
+    return HttpContextHolder.queue[0]?.cycleId;
   }
 }
 
