@@ -247,7 +247,8 @@ export class DeliveriesController {
     @Body('payload') payload: string,
     @Body('insured') insured: string
   ) {
-    return DeliveriesService.create_delivery_and_charge({ you, delivery_image, data: JSON.parse(payload), insured: !!insured && insured === 'false' }).then(ControllerServiceResultsHandler);
+    const isInsured: boolean = !!insured && insured === 'true';
+    return DeliveriesService.create_delivery_and_charge({ you, delivery_image, data: JSON.parse(payload), insured: isInsured }).then(ControllerServiceResultsHandler);
   }
 
   @Post('/find-available')
