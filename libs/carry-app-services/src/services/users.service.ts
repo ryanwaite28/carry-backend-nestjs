@@ -700,15 +700,26 @@ export class UsersService {
     const userDisplayName = getUserFullName(new_user);
 
     // create stripe customer account       stripe_customer_account_id
-    const customer = await StripeService.stripe.customers.create({
-      name: userDisplayName,
-      description: `Modern Apps Customer: ${userDisplayName}`,
-      email: new_user.email,
-      metadata: {
-        user_id: new_user.id,
-        ...createInfo
-      }
-    });
+
+    /*
+      Check if there is somehow an existing customer by the email; if so, use it, else create new customer
+    */
+    let customer = await StripeService.stripe.customers.search({
+      query: `email:'${new_user.email}'`
+    })
+    .then((results) => results && results.data[0]);
+    if (!customer) {
+      customer = await StripeService.stripe.customers.create({
+        name: userDisplayName,
+        description: `Modern Apps Customer: ${userDisplayName}`,
+        email: new_user.email,
+        metadata: {
+          user_id: new_user.id,
+          ...createInfo
+        }
+      });
+    }
+
 
     // create user api key to use as a service/developer account
     const api_key = await UserRepo.create_user_api_key(new_user.id);
