@@ -7,48 +7,29 @@ import {
   Body,
   Param,
   Query,
-  Req,
-  Res,
   ParseIntPipe,
   UseGuards,
-  UseInterceptors,
   ParseFloatPipe,
   ValidationPipe,
 } from '@nestjs/common';
-import { IAuthJwtResults } from '../../interfaces/common.interface';
-import { UsersService } from '../../services/users.service';
 import { DeliveriesService } from '../../services/deliveries.service';
 import { ControllerServiceResultsHandler } from '../../utils/helpers.utils';
 import { UploadedFile } from 'express-fileupload';
 import {
-  DeliveryExistsParam,
   ExpressUploadedFile,
-  JwtPayloadSlim,
   JwtPayloadAuthorized,
-  UserExistsParam,
 } from '../../decorators/jwt-payload/jwt-payload.decorator';
-import { YouAuthorized, YouAuthorizedSlim } from '../../guards/auth/auth.guard';
-import { MessagesService } from '../../services/messages.service';
-import { MessagingsService } from '../../services/messagings.service';
-import { NotificationsService } from '../../services/notifications.service';
-import { MODERN_APPS } from '../../enums/carry.enum';
+import { YouAuthorizedSlim } from '../../guards/auth/auth.guard';
 import {
-  UserExists,
   YouAuthorizedSlimWeak,
 } from '../../guards/user/user.guard';
-import { DeliveryCarrierRequestEntity, DeliveryDisputeEntity, DeliveryDisputeSettlementOfferEntity, DeliveryEntity, UserEntity } from '../../entities/carry.entity';
 import {
-  CreateSiteFeedbackDto,
-  CreateUserDto,
-  CreateUserNewListingsAlertDto,
-  LoginUserDto,
-  RedirectBodyDto,
-  RegisterExpoTokenDto,
-  ResetPasswordRequestDto,
-  SendUserMessageDto,
-  UpdateUserDto,
-  UserPasswordUpdateDto,
-} from '../../dto/user.dto';
+  DeliveryCarrierRequestEntity,
+  DeliveryDisputeEntity,
+  DeliveryDisputeSettlementOfferEntity,
+  DeliveryEntity,
+  UserEntity
+} from '../../entities/carry.entity';
 import {
   CarrierHasNoPendingDeliveryRequest,
   CarrierIsBelowCarryingLimit,
@@ -85,7 +66,13 @@ import {
   SettlementStatusIsPending,
   IsNotSettlementOfferCreator,
 } from '../../guards/delivery/delivery-dispute.guard';
-import { CreateCarrierupdateLocationDto, CreateDisputeSettlementOfferDto, FindAvailableDeliveryDto, SearchDeliveriesDto, SendDeliveryMessageDto } from '@carry/carry-app-services/dto/deliveries.dto';
+import {
+  CreateCarrierupdateLocationDto,
+  CreateDisputeSettlementOfferDto,
+  FindAvailableDeliveryDto,
+  SearchDeliveriesDto,
+  SendDeliveryMessageDto
+} from '@carry/carry-app-services/dto/deliveries.dto';
 import { ResponseLocals } from '@carry/carry-app-services/decorators/common/common.decorator';
 
 

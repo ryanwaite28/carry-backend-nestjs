@@ -669,7 +669,7 @@ export class UsersService {
     }
 
     if (username) {
-      const check_username = await UserRepo.get_user_by_email(username);
+      const check_username = await UserRepo.get_user_by_username(username);
       if (check_username) {
         const serviceMethodResults: ServiceMethodResults = {
           status: HttpStatusCode.BAD_REQUEST,
