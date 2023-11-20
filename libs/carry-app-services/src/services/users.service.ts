@@ -40,6 +40,7 @@ import { ResponseLocals } from '../decorators/common/common.decorator';
 import { HttpContextHolder } from '../middlewares/http-context.middleware';
 import { search_user_deliveries_by_title, search_user_past_delivering_by_title } from '../repos/deliveries.repo';
 import { LEADING_SPACES_GLOBAL } from '../regex/common.regex';
+import { Logger } from '@nestjs/common';
 
 
 
@@ -78,29 +79,31 @@ export class UsersService {
         const noCustomerAcct = !auth.you.stripe_customer_account_id || auth.you.stripe_customer_account_id === null;
         console.log({ noCustomerAcct });
 
-        // if (noCustomerAcct) {
-        //   console.log(`Creating stripe customer account for user ${auth.you.id}...`);
+        if (noCustomerAcct) {
+          console.log(`Creating stripe customer account for user ${auth.you.id}...`);
           
-        //   const userDisplayName = getUserFullName(auth.you);
+          const userDisplayName = getUserFullName(auth.you);
 
-        //   // create stripe customer account       stripe_customer_account_id
-        //   const customer = await StripeService.stripe.customers.create({
-        //     name: userDisplayName,
-        //     description: `Modern Apps Customer: ${userDisplayName}`,
-        //     email: auth.you.email,
-        //     metadata: {
-        //       user_id: auth.you.id,
-        //     }
-        //   });
+          // create stripe customer account       stripe_customer_account_id
+          const customer = await StripeService.stripe.customers.create({
+            name: userDisplayName,
+            description: `Modern Apps Customer: ${userDisplayName}`,
+            email: auth.you.email,
+            metadata: {
+              user_id: auth.you.id,
+            }
+          });
 
-        //   const updateUserResults = await UserRepo.update_user({ stripe_customer_account_id: customer.id }, { id: auth.you.id });
-        //   let new_user_model = await UserRepo.get_user_by_id(auth.you.id);
-        //   let new_user = new_user_model!;
-        //   auth.you = new_user;
+          const updateUserResults = await UserRepo.update_user_by_id(auth.you.id, { stripe_customer_account_id: customer.id });
+          // const updateUserResults = await UserRepo.update_user({ stripe_customer_account_id: customer.id }, { id: auth.you.id });
 
-        //   // create JWT
-        //   jwt = TokensService.newUserJwtToken(auth.you);
-        // }
+          let new_user_model = await UserRepo.get_user_by_id(auth.you.id);
+          let new_user = new_user_model!;
+          auth.you = new_user;
+
+          // create JWT
+          jwt = TokensService.newUserJwtToken(auth.you);
+        }
 
         const stripe_acct_status = !!auth.you.stripe_account_id && await StripeService.account_is_complete(auth.you.stripe_account_id);
 
@@ -109,7 +112,7 @@ export class UsersService {
         */
         is_identity_verified = await UsersService.handle_user_identity_verified_event(auth.you.id);
         
-        is_account_ready = !stripe_acct_status.error;
+        is_account_ready = !!auth.you.stripe_account_id && !stripe_acct_status.error;
 
         console.log({ stripe_acct_status, is_identity_verified, is_account_ready });
 
@@ -658,6 +661,7 @@ export class UsersService {
 
     const check_email = await UserRepo.get_user_by_email(email);
     if (check_email) {
+      Logger.debug(`Email is already in use: ${check_email}`);
       const serviceMethodResults: ServiceMethodResults = {
         status: HttpStatusCode.BAD_REQUEST,
         error: true,
@@ -671,6 +675,7 @@ export class UsersService {
     if (username) {
       const check_username = await UserRepo.get_user_by_username(username);
       if (check_username) {
+        Logger.debug(`Username is already in use: ${username}`);
         const serviceMethodResults: ServiceMethodResults = {
           status: HttpStatusCode.BAD_REQUEST,
           error: true,
@@ -699,8 +704,31 @@ export class UsersService {
 
     const userDisplayName = getUserFullName(new_user);
 
-    // create stripe customer account       stripe_customer_account_id
+    // send welcome and verify email
+    try {
+      HandlebarsEmailsService.send_signup_welcome_email(new_user);
+    }
+    catch (e) {
+      console.log(`could not sent sign up email:`, e, { new_user });
+    }
 
+    // create user api key to use as a service/developer account
+    UserRepo.create_user_api_key(new_user.id)
+    .then((api_key) => {
+      console.log({ api_key });
+      try {
+        HandlebarsEmailsService.send_signup_welcome_apikey_email(new_user, api_key.uuid);
+      }
+      catch (e) {
+        console.log(`could not sent sign up email:`, e, { new_user });
+      }
+    })
+    .catch((error) => {
+      console.log(`Could not send API key email`);
+      console.log(error);
+    });
+
+    // create stripe customer account       stripe_customer_account_id
     /*
       Check if there is somehow an existing customer by the email; if so, use it, else create new customer
     */
@@ -719,23 +747,15 @@ export class UsersService {
         }
       });
     }
-
-
-    // create user api key to use as a service/developer account
-    const api_key = await UserRepo.create_user_api_key(new_user.id);
-    console.log({ api_key });
+    else {
+      console.log(`Stripe customer exists by email: ${new_user.email}`);
+    }
 
     const updateUserResults = await UserRepo.update_user_by_id(new_user.id, { stripe_customer_account_id: customer.id });
+
     new_user_model = await UserRepo.get_user_by_id(new_user.id);
     new_user = new_user_model!;
   
-    try {
-      HandlebarsEmailsService.send_signup_welcome_email(new_user, api_key.uuid);
-    }
-    catch (e) {
-      console.log(`could not sent sign up email:`, e, { new_user });
-    }
-
     // create JWT
     const jwt = TokensService.newUserJwtToken(new_user);
 

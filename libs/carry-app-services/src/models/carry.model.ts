@@ -22,7 +22,7 @@ export const Users = <MyModelStatic> sequelize.define('carry_users', {
 
   username:                            { type: Sequelize.STRING, allowNull: false },
   displayname:                         { type: Sequelize.STRING, allowNull: false, defaultValue: '' },
-  email:                               { type: Sequelize.STRING, allowNull: false },
+  email:                               { type: Sequelize.STRING, allowNull: false, unique: true },
   password:                            { type: Sequelize.STRING, allowNull: false },
 
   paypal:                              { type: Sequelize.STRING, allowNull: true },
@@ -87,7 +87,7 @@ export const Users = <MyModelStatic> sequelize.define('carry_users', {
   uuid:                                { type: Sequelize.STRING, unique: true, defaultValue: Sequelize.UUIDV1 }
 }, {
   ...common_options,
-  indexes: [{ unique: true, fields: ['email', 'paypal', 'uuid']} ] 
+  indexes: [] 
 });
 
 export const S3Objects = <MyModelStatic> sequelize.define('carry_s3_objects', {

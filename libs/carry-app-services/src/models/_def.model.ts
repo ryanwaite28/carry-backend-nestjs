@@ -78,7 +78,7 @@ export const carry_db_init = async () => {
 
   const sequelize_db_sync_options: Sequelize.SyncOptions = {
     force: false,
-    alter: false, 
+    alter: true, 
   };
   
   console.log({

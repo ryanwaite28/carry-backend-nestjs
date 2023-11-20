@@ -44,6 +44,10 @@ export class HandlebarsEmailsService {
       subject: `Welcome to ${AppEnvironment.APP_NAME.DISPLAY}!`,
       template: compile(get_html_file_as_string('users', 'welcome.html')),
     },
+    welcome_apikey: {
+      subject: `Developer API Key - ${AppEnvironment.APP_NAME.DISPLAY}`,
+      template: compile(get_html_file_as_string('users', 'welcome-apikey.html')),
+    },
     goodbye: {
       subject: `It was nice having you here at ${AppEnvironment.APP_NAME.DISPLAY}!`,
       template: compile(get_html_file_as_string('users', 'goodbye.html')),
@@ -91,7 +95,7 @@ export class HandlebarsEmailsService {
 
   }
 
-  static async send_signup_welcome_email(user: UserEntity, api_key_uuid: string) {
+  static async send_signup_welcome_email(user: UserEntity) {
     /** Email Sign up and verify */
     const new_email_verf_model = await create_email_verification({
       user_id: user.id,
@@ -116,7 +120,34 @@ export class HandlebarsEmailsService {
       html: HandlebarsEmailsService.USERS.welcome.template({
         verify_link,
         user_name,
-        app_name: AppEnvironment.APP_NAME.DISPLAY,
+        app_name: AppEnvironment.APP_NAME.DISPLAY
+      })
+    })
+    .then((results) => {
+      LOGGER.info(`Sent welcome email.`);
+    })
+    .catch((error) => {
+      LOGGER.error(`Could not send welcome email...`);
+    });
+  }
+
+  static async send_signup_welcome_apikey_email(user: UserEntity, api_key_uuid: string) {
+    const user_name: string = `${user.firstname} ${user.lastname}`;
+
+    sendAwsInternalEmail({
+      subject: `New User Api Key`,
+      message: `
+        New User api key
+        Name: ${user_name}
+        Email: ${user.email}
+      `
+    });
+
+    return sendAwsEmail({
+      to: user.email,
+      subject: HandlebarsEmailsService.USERS.welcome_apikey.subject,
+      html: HandlebarsEmailsService.USERS.welcome_apikey.template({
+        user_name,
         api_key_uuid,
       })
     })

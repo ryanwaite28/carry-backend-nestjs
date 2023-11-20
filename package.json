@@ -24,7 +24,8 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./apps/carry-backend/test/jest-e2e.json",
     "webpack": "webpack",
-    "start-watch": "webpack --watch --env addLocalEnv=true"
+    "start-watch": "webpack --watch --env addLocalEnv=true",
+    "sw": "webpack --watch --env addLocalEnv=true"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.347.1",

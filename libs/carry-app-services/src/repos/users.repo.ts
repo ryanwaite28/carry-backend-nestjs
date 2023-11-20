@@ -120,7 +120,7 @@ export async function get_user_by_email(
     const userModel = await users_crud.findOne({
       where: { email },
       attributes: user_attrs_slim
-    })
+    });
     return userModel;
   } catch (e) {
     console.log(`get_user_by_email error - `, e);
